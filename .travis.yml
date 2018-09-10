@@ -3,3 +3,4 @@ language: python
 install: make deps
 cache: pip
 script: make test
+python: 3.7
