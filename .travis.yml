@@ -1,0 +1,5 @@
+sudo: false
+language: python
+install: make deps
+cache: pip
+script: make test
