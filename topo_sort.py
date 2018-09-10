@@ -34,7 +34,7 @@ class Graph:
 
     # Returns a list of the vertices representing at topological ordering
     # obeying the graph's structure. The algorithm in Kozen, and the one we
-    # implement here, is the Tarjan algorithm, not the DFS algorithm.
+    # implement here, is the Kahn algorithm, not the DFS algorithm.
     #
     # This version is modified from the one in the book to not modify the graph
     # in-place, at the expense of using O(n) more memory.
@@ -68,6 +68,8 @@ import pytest
 
 # Check that the sort order is viable
 def assert_topo_sort(graph, order):
+    assert len(order) == len(graph.adj_list)
+
     g = graph
     for i,v in enumerate(order):
         for x in g.out(v):
@@ -159,6 +161,22 @@ def test_two_edges():
     assert order == [0,1,2]
 
     assert_topo_sort(g, order)
+
+def test_dag_1():
+    edges = [
+            (0,1),
+            (0,2),
+            (1,2),
+            (2,3),
+    ]
+    g = Graph(edges)
+
+    order = g.topo_sort()
+    assert_topo_sort(g, order)
+
+    # [0,1,3,2] is also a valid ordering but is not the one produced by this
+    # algorithm
+    assert order == [0,1,2,3]
 
 def test_random_50():
     # generate 100 random trees with 50 vertices and topologically sort them
