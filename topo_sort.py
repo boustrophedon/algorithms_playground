@@ -1,7 +1,6 @@
 from collections import defaultdict
 import random
 
-
 # Creates a directed graph stored as an adjacency list, where each element in
 # the list contains a list of incoming and outgoing edges, represented by the
 # vertex on the other end. Technically I guess the vertices can be anything
@@ -36,10 +35,34 @@ class Graph:
     # Returns a list of the vertices representing at topological ordering
     # obeying the graph's structure. The algorithm in Kozen, and the one we
     # implement here, is the Tarjan algorithm, not the DFS algorithm.
+    #
+    # This version is modified from the one in the book to not modify the graph
+    # in-place, at the expense of using O(n) more memory.
     def topo_sort(self):
-        return [0,1]
+        queue = list()
+        order = list()
+
+        inc_remaining = defaultdict(lambda: 0)
+
+        for v, (out, inc) in self.adj_list.items():
+            if len(inc) == 0:
+                queue.append(v)
+            else:
+                inc_remaining[v] = len(inc)
+
+        while queue:
+            current = queue.pop()
+            order.append(current)
+            for v in self.out(current):
+                inc_remaining[v] -= 1
+                if inc_remaining[v] == 0:
+                    queue.append(v)
+
+        return order
+
 
 ### Tests
+import pytest
 
 ## Test Utilities
 
@@ -51,6 +74,12 @@ def assert_topo_sort(graph, order):
             # assert that if x is an outgoing neighbor of v, then it comes
             # after v in the ordering
             assert i < order.index(x)
+
+# check test fails when not topologically sorted
+def test_assert_topo_sort():
+    with pytest.raises(AssertionError):
+        g = Graph([(0,1)])
+        assert_topo_sort(g, [1,0])
 
 ## Test graph generators
 
@@ -122,11 +151,18 @@ def test_one_edge():
 
     assert_topo_sort(g, order)
 
-# def test_two_edges():
-#     edges = [(0,1), (1,2)]
-#     g = Graph(edges)
-# 
-#     order = g.topo_sort()
-#     assert order == [0,1,2]
-# 
-#     assert_topo_sort(g, order)
+def test_two_edges():
+    edges = [(0,1), (1,2)]
+    g = Graph(edges)
+
+    order = g.topo_sort()
+    assert order == [0,1,2]
+
+    assert_topo_sort(g, order)
+
+def test_random_50():
+    # generate 100 random trees with 50 vertices and topologically sort them
+    for _ in range(0,100):
+        g = gen_ditree(50)
+        order = g.topo_sort()
+        assert_topo_sort(g, order)
