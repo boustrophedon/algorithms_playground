@@ -1,4 +1,6 @@
 from collections import defaultdict
+import random
+
 
 # Creates a directed graph stored as an adjacency list, where each element in
 # the list contains a list of incoming and outgoing edges, represented by the
@@ -39,6 +41,48 @@ class Graph:
 
 ### Tests
 
+## Test Utilities
+
+# Check that the sort order is viable
+def assert_topo_sort(graph, order):
+    g = graph
+    for i,v in enumerate(order):
+        for x in g.out(v):
+            # assert that if x is an outgoing neighbor of v, then it comes
+            # after v in the ordering
+            assert i < order.index(x)
+
+## Test graph generators
+
+# Generates a directed tree with n vertices in the following manner:
+# Start with a set of n disconnected vertices 
+# At each step, pick a random vertex from the vertices in the graph, and a random vertex from the disconnected vertices.
+# Add an edge between the graph vertex and the chosen vertex, and remove it from the disconnected set.
+# Continue until there are no more disconnected vertices.
+#
+# As an extension, I feel like you could maybe use a multiset where each
+# element has cardinality k for the disconnected vertices to generate a
+# k-connected graph if you make sure not to choose repeats. You couldn't use
+# this to generate a DAG though, it would probably end up having cycles.
+def gen_ditree(n):
+    graph = Graph()
+    graph_vertices = [0]
+    remaining = list(range(1, n))
+    while len(remaining) > 0:
+        v1 = random.choice(graph_vertices)
+        v2 = random.choice(remaining)
+        graph.add_edge(v1, v2)
+        remaining.remove(v2)
+    return graph
+
+# just call to make sure it works
+# TODO check vertex degrees and acyclicity
+def test_gen_ditree():
+    gen_ditree(1)
+    gen_ditree(10)
+    gen_ditree(100)
+
+
 ## Basic add tests
 def test_add_edge_1():
     g = Graph()
@@ -67,16 +111,6 @@ def test_add_edges_2():
 
     assert len(g.inc(v1)) == 0
     assert len(g.out(v3)) == 0
-
-## Utility for checking whether topological sort is valid possiblility
-
-def assert_topo_sort(graph, order):
-    g = graph
-    for i,v in enumerate(order):
-        for x in g.out(v):
-            # assert that if x is an outgoing neighbor of v, then it comes
-            # after v in the ordering
-            assert i < order.index(x)
 
 ## Topological sort tests
 
