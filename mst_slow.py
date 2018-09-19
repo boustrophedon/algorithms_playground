@@ -59,10 +59,10 @@ class Graph:
         components = dict()
         new_component = 0
 
-        print(components)
         for edge in edges:
-            print(components)
-            v1,v2 = edge[0], edge[1]
+            # we don't need the weight inside this loop
+            v1,v2,_ = edge
+
             # both vertices are in the same component: skip it
             if components.get(v1) == components.get(v2) != None:
                 continue
