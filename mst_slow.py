@@ -33,17 +33,17 @@ class Graph:
                     edges.add((v1,v2,w))
         return edges
 
-    # determines if graph is connected via simple BFS
+    # determines if graph is connected via simple DFS
     def is_connected(self):
         visited = set()
-        queue = list()
-        queue.append(0)
-        while queue:
-            current = queue.pop()
+        stack = list()
+        stack.append(0)
+        while stack:
+            current = stack.pop()
             visited.add(current)
             for n,_ in self.adj_list[current]:
                 if n not in visited:
-                    queue.append(n)
+                    stack.append(n)
 
         # if we visited all the vertices after a BFS then it's connected
         return len(visited) == len(self.adj_list)
