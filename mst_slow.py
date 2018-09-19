@@ -4,6 +4,9 @@
 # Currently the tests only check that it is a spanning tree, not a minimal one. I am not sure how to check that it is minimal.
 # This is a "slow" implementation because the merge operation is slow - we do not use a union-find data structure.
 
+# Apparently there are linear time algorithms to do this, but then I'd have to write even more code to test the implementation of the verification algorithms.
+# https://www.cs.princeton.edu/courses/archive/fall03/cs528/handouts/A%20Simpler%20Minimum%20Spanning.pdf
+
 from collections import defaultdict
 
 class Graph:
