@@ -77,3 +77,55 @@ def test_one_edge():
     paths = g.shortest_paths(0)
     assert len(paths) == 1
     assert paths[1] == [(0,1,1)]
+
+def test_two_edges_line():
+    g = Graph()
+    g.add_edge(0,1,1)
+    g.add_edge(1,2,1)
+
+    paths = g.shortest_paths(0)
+    assert len(paths) == 2
+    assert paths[1] == [(0,1,1)]
+    assert paths[2] == [(0,1,1), (1,2,1)]
+
+def test_two_edges_spoke():
+    g = Graph()
+    g.add_edge(0,1,1)
+    g.add_edge(0,2,1)
+
+    paths = g.shortest_paths(0)
+    assert len(paths) == 2
+    assert paths[1] == [(0,1,1)]
+    assert paths[2] == [(0,2,1)]
+
+def test_diamond_equal_weights():
+    g = Graph()
+    g.add_edge(0,1,1)
+    g.add_edge(0,2,1)
+    g.add_edge(1,3,1)
+    g.add_edge(2,3,1)
+
+    # this is implementation dependent but we could probably make it not so by
+    # taking the lowest-numbered (or total-lowest-numbered? i haven't thought
+    # this through) path
+    paths = g.shortest_paths(0)
+    assert len(paths) == 2
+    assert paths[1] == [(0,1,1)]
+    assert paths[2] == [(0,2,1)]
+    assert paths[3] == [(0,1,1), (1,3,1)]
+
+def test_diamond_unique_weights():
+    g = Graph()
+    g.add_edge(0,1,1)
+    g.add_edge(0,2,1)
+    g.add_edge(1,3,2) # path that was selected in previous test is now higher-weight
+    g.add_edge(2,3,1)
+
+    paths = g.shortest_paths(0)
+    assert len(paths) == 2
+    assert paths[1] == [(0,1,1)]
+    assert paths[2] == [(0,2,1)]
+    assert paths[3] == [(0,1,1), (2,3,1)]
+
+# TODO: determine how to property test/validate that paths are shortest
+# easy sanity checks: path length is bounded by number of vertices (i.e. no repeated vertices)
