@@ -35,6 +35,14 @@ class Graph:
 # Connected weighted graph generator, reused from mst_slow.py
 
 # I am not sure if there are graphs this method cannot generate
+# Update: I'm pretty sure you can prove that you can generate every connected
+# graph with this method by a simple induction but I am now equally sure that
+# it doesn't generate every graph with equal probability.
+#
+# I think there are methods by which you first generate a spanning tree with
+# uniform probability, and then add more edges. This method generates a
+# spanning tree at first, but the first vertex we pick has a higher probability
+# of having a higher degree than the last vertex picked.
 def gen_weighted_connected_graph(num_vertices, num_edges, max_weight):
     assert num_edges >= num_vertices-1
 
