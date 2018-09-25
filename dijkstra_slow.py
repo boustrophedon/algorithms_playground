@@ -36,12 +36,12 @@ class Graph:
 
 # I am not sure if there are graphs this method cannot generate
 # Update: I'm pretty sure you can prove that you can generate every connected
-# graph with this method by a simple induction but I am now equally sure that
-# it doesn't generate every graph with equal probability.
+# graph with this method by induction but I am now equally sure that
+# it doesn't generate them with equal probability.
 #
 # I think there are methods by which you first generate a spanning tree with
-# uniform probability, and then add more edges. This method generates a
-# spanning tree at first, but the first vertex we pick has a higher probability
+# uniform probability, and then add more edges. This method *does* generates a
+# spanning tree first, but eg the first vertex we pick has a higher probability
 # of having a higher degree than the last vertex picked.
 def gen_weighted_connected_graph(num_vertices, num_edges, max_weight):
     assert num_edges >= num_vertices-1
@@ -117,7 +117,7 @@ def test_diamond_equal_weights():
     # taking the lowest-numbered (or total-lowest-numbered? i haven't thought
     # this through) path
     paths = g.shortest_paths(0)
-    assert len(paths) == 2
+    assert len(paths) == 3
     assert paths[1] == [(0,1,1)]
     assert paths[2] == [(0,2,1)]
     assert paths[3] == [(0,1,1), (1,3,1)]
@@ -130,10 +130,22 @@ def test_diamond_unique_weights():
     g.add_edge(2,3,1)
 
     paths = g.shortest_paths(0)
-    assert len(paths) == 2
+    assert len(paths) == 3
     assert paths[1] == [(0,1,1)]
     assert paths[2] == [(0,2,1)]
-    assert paths[3] == [(0,1,1), (2,3,1)]
+    assert paths[3] == [(0,2,1), (2,3,1)]
+
+def test_triangle_shorter_total():
+    g = Graph()
+    g.add_edge(0,1,1)
+    g.add_edge(1,2,1)
+
+    g.add_edge(0,2,3)
+
+    paths = g.shortest_paths(0)
+    assert len(paths) == 2
+    assert paths[1] == [(0,1,1)]
+    assert paths[2] == [(0,1,1), (1,2,1)]
 
 # TODO: determine how to property test/validate that paths are shortest
 # easy sanity checks: path length is bounded by number of vertices (i.e. no repeated vertices)
