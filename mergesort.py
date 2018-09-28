@@ -1,5 +1,51 @@
 # This isn't in Kozen but I just felt like doing something relatively easy and also it gives me an excuse to use Hypothesis.
 
+# Given an list of comparables, return a new list containing the same items in
+# the input in sorted order. I say "comparables" but I only really test on
+# integers, it's just that the code only uses the < operator. This
+# implementation should be a stable sort but I don't have any tests for it.
+#
+# I'm using a bottom-up non-recursive approach because I don't think I've
+# written a non-recursive merge sort before. We push each element of the input
+# onto a queue as a single-element list, and then traverse the queue in pairs
+# and merge them, pushing them onto a different queue. Then we swap the queues
+# and continue until there's only one element left, which is the result.
+def mergesort(v):
+    if len(v) < 2:
+        return list(v)
+
+    # we could save space here by using a smarter queue/algorithm:
+    # use a single queue, and in each iteration, make note of the first
+    # element that we push onto it, and then stop the iteration when we reach
+    # it again.
+    front_queue = list()
+    back_queue = list()
+    for x in v:
+        front_queue.append([x])
+
+    while len(front_queue) > 1:
+        for i in range(0, len(front_queue), 2):
+            # if there are an odd number of items to merge, cheat and merge it
+            # with the last element in the back_queue. if we don't, in cases with
+            # eg 2^k+1 elements, at the last iteration  we'll end up with a
+            # vector of size n-1 and a vector of size 1 in the queue
+            #
+            # i feel like there should be a better solution to this
+            if i == len(front_queue)-1:
+                last = merge(front_queue[i], back_queue[-1])
+                back_queue[-1] = last
+            else:
+                merged = merge(front_queue[i], front_queue[i+1])
+                back_queue.append(merged)
+        tmp = front_queue
+        front_queue = back_queue
+        back_queue = tmp
+        back_queue.clear()
+
+    return front_queue.pop()
+
+    
+
 # Given two sorted lists, merge them into a single, new sorted list
 def merge(l,r):
     output = list()
@@ -32,6 +78,60 @@ def merge(l,r):
 # Tests
 from hypothesis import given
 import hypothesis.strategies as st
+
+# Mergesort tests
+
+def test_msort_empty():
+    v = []
+    result = mergesort(v)
+
+    assert result == []
+
+def test_msort_one():
+    v = [1,]
+    result = mergesort(v)
+
+    assert result == [1,]
+
+def test_msort_simple():
+    v = [1,2]
+    result = mergesort(v)
+
+    assert result == [1,2]
+
+    v = [2,1]
+    result = mergesort(v)
+
+    assert result == [1,2]
+
+def test_msort_small_cases():
+    v = [1,2,3,4]
+    result = mergesort(v)
+
+    assert result == [1,2,3,4]
+
+    v = [5,4,3,2,1]
+    result = mergesort(v)
+
+    assert result == [1,2,3,4,5]
+
+    v = [1,3,2,5,4]
+    result = mergesort(v)
+
+    assert result == [1,2,3,4,5]
+
+    v = [1,2,4,5,6,2]
+    result = mergesort(v)
+
+    assert result == [1,2,2,4,5,6]
+
+@given(st.lists(st.integers()))
+def test_msort_arb(v):
+    result = mergesort(v)
+
+    assert result == sorted(v)
+
+# Merge operation tests
 
 def test_merge_empty():
     l = []
