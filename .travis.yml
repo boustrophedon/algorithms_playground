@@ -1,6 +1,9 @@
 sudo: false
 language: python
-install: make deps
+install: 
+        - pip install pipenv --upgrade
+        - pipenv install --dev --skip-lock
 cache: pip
-script: make test
+script:
+        - pipenv run pytest --pyargs algo
 python: 3.6
