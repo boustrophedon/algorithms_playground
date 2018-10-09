@@ -9,6 +9,9 @@ numpy = "*"
 [dev-packages]
 pytest = "*"
 hypothesis = "*"
+perf = "*"
+scikit-learn = "*"
+matplotlib = "*"
 
 [requires]
 python_version = "3.7"
