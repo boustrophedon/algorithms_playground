@@ -104,6 +104,12 @@ def test_msort_simple():
 
     assert result == [1,2]
 
+def test_msort_long():
+    v = list(reversed(range(0,10000)))
+    result = mergesort(v)
+
+    assert result == list(range(0,10000))
+
 def test_msort_small_cases():
     v = [1,2,3,4]
     result = mergesort(v)
