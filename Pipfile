@@ -12,6 +12,9 @@ hypothesis = "*"
 perf = "*"
 scikit-learn = "*"
 matplotlib = "*"
+pudb = "*"
+pytest-pudb = "*"
+mypy = "*"
 
 [requires]
 python_version = "3.7"
