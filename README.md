@@ -34,7 +34,7 @@ Just practice implementing some algorithms for interview prep, mostly from Kozen
 ## Misc
 - [x] Strassen multiplication
 - [x] Mergesort (non-recursive)
-
+- [ ] Burrows-Wheeler transformation
 
 # Running the code
 
