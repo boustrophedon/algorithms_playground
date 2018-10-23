@@ -6,5 +6,6 @@ install:
         - pipenv install --dev --skip-lock
 cache: pip
 script:
+        - pipenv run mypy algo/
         - pipenv run pytest
 python: 3.6
