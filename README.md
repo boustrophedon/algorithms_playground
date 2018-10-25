@@ -4,6 +4,8 @@ Just practice implementing some algorithms for interview prep, mostly from Kozen
 
 # Algorithms
 
+[\*] indicates there are benchmarks for the code as well.
+
 ## Graph algorithms
 - [x] Dijkstra's
 - [ ] Dijkstra's with binomial/fibonacci heap
@@ -26,14 +28,14 @@ Just practice implementing some algorithms for interview prep, mostly from Kozen
 - [ ] Maybe faster hash functions (many blog posts about this)
 
 ## Collections
-- [ ] Binomial heaps
+- [x] Binomial heaps
 - [ ] Fibonacci heaps
 - [ ] Union-find
 - [ ] Splay tree
 
 ## Misc
 - [x] Strassen multiplication
-- [x] Mergesort (non-recursive)
+- [x] Mergesort (non-recursive) [\*]
 - [ ] Burrows-Wheeler transformation
 
 # Running the code
