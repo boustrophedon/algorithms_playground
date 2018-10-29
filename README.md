@@ -30,6 +30,8 @@ Just practice implementing some algorithms for interview prep, mostly from Kozen
 ## Collections
 - [x] Binomial heaps
 - [ ] Fibonacci heaps
+- [ ] Pairing heap
+- [ ] Treap
 - [ ] Union-find
 - [ ] Splay tree
 

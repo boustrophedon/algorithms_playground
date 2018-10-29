@@ -92,7 +92,8 @@ class BinomialHeap:
     def meld(self, other: 'BinomialHeap'):
         """ Merge heap `other` into this heap. O(log(n))
 
-        You should not use `other` after passing it into `meld`.
+        You should not `meld(x, x)`. Additionally, you should not use
+        `other` after passing it into `meld`.
 
         Meld works similar to doing addition by hand: you add up the trees of
         the same rank and carry if there's an extra.
@@ -217,7 +218,8 @@ class _BinTree:
         The root of this tree will become the smaller of this tree or the other
         tree's root.
         
-        You should not use `other` after using it as an argument to link.
+        You should not `link(x, x)`. Additionally, you should not use `other`
+        after using it as an argument to link.
         """
 
         if self.rank != other.rank:
