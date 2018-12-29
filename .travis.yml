@@ -8,4 +8,5 @@ cache: pip
 script:
         - pipenv run mypy algo/
         - pipenv run pytest
+        - pipenv run black --check algo/
 python: 3.6
