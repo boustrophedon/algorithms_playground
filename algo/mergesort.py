@@ -31,11 +31,11 @@ def mergesort(v):
             # vector of size n-1 and a vector of size 1 in the queue
             #
             # i feel like there should be a better solution to this
-            if i == len(front_queue)-1:
+            if i == len(front_queue) - 1:
                 last = merge(front_queue[i], back_queue[-1])
                 back_queue[-1] = last
             else:
-                merged = merge(front_queue[i], front_queue[i+1])
+                merged = merge(front_queue[i], front_queue[i + 1])
                 back_queue.append(merged)
         tmp = front_queue
         front_queue = back_queue
@@ -44,10 +44,9 @@ def mergesort(v):
 
     return front_queue.pop()
 
-    
 
 # Given two sorted lists, merge them into a single, new sorted list
-def merge(l,r):
+def merge(l, r):
     output = list()
 
     l_current = 0
@@ -81,55 +80,61 @@ import hypothesis.strategies as st
 
 # Mergesort tests
 
+
 def test_msort_empty():
     v = []
     result = mergesort(v)
 
     assert result == []
 
+
 def test_msort_one():
-    v = [1,]
+    v = [1]
     result = mergesort(v)
 
-    assert result == [1,]
+    assert result == [1]
+
 
 def test_msort_simple():
-    v = [1,2]
+    v = [1, 2]
     result = mergesort(v)
 
-    assert result == [1,2]
+    assert result == [1, 2]
 
-    v = [2,1]
+    v = [2, 1]
     result = mergesort(v)
 
-    assert result == [1,2]
+    assert result == [1, 2]
+
 
 def test_msort_long():
-    v = list(reversed(range(0,10000)))
+    v = list(reversed(range(0, 10000)))
     result = mergesort(v)
 
-    assert result == list(range(0,10000))
+    assert result == list(range(0, 10000))
+
 
 def test_msort_small_cases():
-    v = [1,2,3,4]
+    v = [1, 2, 3, 4]
     result = mergesort(v)
 
-    assert result == [1,2,3,4]
+    assert result == [1, 2, 3, 4]
 
-    v = [5,4,3,2,1]
+    v = [5, 4, 3, 2, 1]
     result = mergesort(v)
 
-    assert result == [1,2,3,4,5]
+    assert result == [1, 2, 3, 4, 5]
 
-    v = [1,3,2,5,4]
+    v = [1, 3, 2, 5, 4]
     result = mergesort(v)
 
-    assert result == [1,2,3,4,5]
+    assert result == [1, 2, 3, 4, 5]
 
-    v = [1,2,4,5,6,2]
+    v = [1, 2, 4, 5, 6, 2]
     result = mergesort(v)
 
-    assert result == [1,2,2,4,5,6]
+    assert result == [1, 2, 2, 4, 5, 6]
+
 
 @given(st.lists(st.integers()))
 def test_msort_arb(v):
@@ -137,73 +142,79 @@ def test_msort_arb(v):
 
     assert result == sorted(v)
 
+
 # Merge operation tests
+
 
 def test_merge_empty():
     l = []
     r = []
-    result = merge(l,r)
+    result = merge(l, r)
 
     assert result == []
 
-def test_merge_single_empty():
-    l = [1,]
-    r = []
-    result = merge(l,r)
 
-    assert result == [1,]
+def test_merge_single_empty():
+    l = [1]
+    r = []
+    result = merge(l, r)
+
+    assert result == [1]
 
     # and the other way
     l = []
-    r = [1,]
-    result = merge(l,r)
+    r = [1]
+    result = merge(l, r)
 
-    assert result == [1,]
+    assert result == [1]
+
 
 def test_merge_singles():
     l = [1]
     r = [2]
-    result = merge(l,r)
+    result = merge(l, r)
 
-    assert result == [1,2]
+    assert result == [1, 2]
 
     # and the other way
     l = [2]
     r = [1]
-    result = merge(l,r)
+    result = merge(l, r)
 
-    assert result == [1,2]
+    assert result == [1, 2]
+
 
 def test_merge_pairs():
-    a = [1,2]
-    b = [1,3]
-    c = [2,3]
-    d = [2,4]
+    a = [1, 2]
+    b = [1, 3]
+    c = [2, 3]
+    d = [2, 4]
 
-    r1 = merge(a,a)
-    r2 = merge(a,b)
-    r3 = merge(a,c)
-    r4 = merge(a,d)
-    assert r1 == [1,1,2,2]
-    assert r2 == [1,1,2,3]
-    assert r3 == [1,2,2,3]
-    assert r4 == [1,2,2,4]
+    r1 = merge(a, a)
+    r2 = merge(a, b)
+    r3 = merge(a, c)
+    r4 = merge(a, d)
+    assert r1 == [1, 1, 2, 2]
+    assert r2 == [1, 1, 2, 3]
+    assert r3 == [1, 2, 2, 3]
+    assert r4 == [1, 2, 2, 4]
 
-    r1 = merge(b,a)
-    r2 = merge(b,b)
-    r3 = merge(b,c)
-    r4 = merge(b,d)
-    assert r1 == [1,1,2,3]
-    assert r2 == [1,1,3,3]
-    assert r3 == [1,2,3,3]
-    assert r4 == [1,2,3,4]
+    r1 = merge(b, a)
+    r2 = merge(b, b)
+    r3 = merge(b, c)
+    r4 = merge(b, d)
+    assert r1 == [1, 1, 2, 3]
+    assert r2 == [1, 1, 3, 3]
+    assert r3 == [1, 2, 3, 3]
+    assert r4 == [1, 2, 3, 4]
+
 
 @given(st.lists(st.integers()), st.lists(st.integers()))
-def test_merge_list_arb(l,r):
+def test_merge_list_arb(l, r):
     # inputs must be sorted
     l = sorted(l)
     r = sorted(r)
 
-    result = merge(l,r)
+    result = merge(l, r)
 
-    assert result == sorted(l+r)
+    assert result == sorted(l + r)

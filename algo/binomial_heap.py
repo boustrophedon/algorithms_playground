@@ -15,7 +15,8 @@ from typing import List, TypeVar, Optional, Any
 # actual type. this is fixed in 3.7 but travis doesn't have it.
 
 # FIXME: constrain E to be a comparable
-E = TypeVar('E', bound=Any)
+E = TypeVar("E", bound=Any)
+
 
 class BinomialHeap:
     def __init__(self) -> None:
@@ -24,7 +25,7 @@ class BinomialHeap:
         self._trees: List[Optional[_BinTree]] = list()
         self._min_idx: Optional[int] = None
 
-    def _get_min_tree(self) -> Optional['_BinTree']:
+    def _get_min_tree(self) -> Optional["_BinTree"]:
 
         if self._min_idx is not None:
             min_tree = self._trees[self._min_idx]
@@ -36,14 +37,16 @@ class BinomialHeap:
             return None
 
     def _update_min_idx(self):
+        # fmt: off
         self._min_idx = min(
-                # (index, minval of tree) for non-None trees
-                ((i,t.value) for i,t in enumerate(self._trees) if t is not None),
-                # select min by value
-                key=lambda x: x[1],
-                # if there are no trees in self._trees, just return None
-                default=(None, None),
-            )[0] # then use the resulting index from the min tuple
+            # (index, minval of tree) for non-None trees
+            ((i, t.value) for i, t in enumerate(self._trees) if t is not None),
+            # select min by value
+            key=lambda x: x[1],
+            # if there are no trees in self._trees, just return None
+            default=(None, None),
+        )[0] # then use the resulting index from the min tuple
+        # fmt: on
 
     def find_min(self) -> Optional[E]:
         """ Find the minimum element of this heap. O(1) """
@@ -64,7 +67,6 @@ class BinomialHeap:
             new_heap = BinomialHeap()
             new_heap.insert(element)
             self.meld(new_heap)
-
 
     def delete_min(self):
         """ Delete the minimum element from this heap. O(log(n)) """
@@ -88,8 +90,7 @@ class BinomialHeap:
 
         self.meld(new_heap)
 
-    
-    def meld(self, other: 'BinomialHeap'):
+    def meld(self, other: "BinomialHeap"):
         """ Merge heap `other` into this heap. O(log(n))
 
         You should not `meld(x, x)`. Additionally, you should not use
@@ -156,7 +157,7 @@ class BinomialHeap:
                     us_i.link(carry)
                     carry = us_i
                     set(us, i, None)
-                else: # for consistency
+                else:  # for consistency
                     pass
 
             # if they have a tree and we don't, add carry if there is one,
@@ -174,7 +175,6 @@ class BinomialHeap:
                 if carry:
                     set(us, i, carry)
                     carry = None
-
 
         # if there's a carry leftover at the end, push it
         if carry:
@@ -202,7 +202,7 @@ class _BinTree:
         """ Returns the rank of the binomial tree. """
         return len(self._children)
 
-    def pop_children(self) -> List['_BinTree']:
+    def pop_children(self) -> List["_BinTree"]:
         """ Returns the children of the root of this tree, which should be a
         list of `_BinTree`s of increasing rank. 
         
@@ -213,7 +213,7 @@ class _BinTree:
 
     # See https://stackoverflow.com/questions/33533148/
     # for why we can't use the actual type. this is fixed in 3.7 but travis doesn't have it.
-    def link(self, other: '_BinTree'):
+    def link(self, other: "_BinTree"):
         """ Combine this tree with `other` to create a new tree of rank k+1.
         The root of this tree will become the smaller of this tree or the other
         tree's root.
@@ -223,7 +223,11 @@ class _BinTree:
         """
 
         if self.rank != other.rank:
-            raise ValueError("Cannot link binomial trees of differing ranks: {} and {}".format(self.rank, other.rank))
+            raise ValueError(
+                "Cannot link binomial trees of differing ranks: {} and {}".format(
+                    self.rank, other.rank
+                )
+            )
 
         if self.value > other.value:
             self._children, other._children = other._children, self._children
@@ -237,6 +241,7 @@ class _BinTree:
 
         return self._value
 
+
 ### Tests
 import random
 
@@ -247,16 +252,19 @@ import hypothesis.strategies as st
 
 # Create and add/find_min tests
 
+
 def test_binheap_create_1():
     h = BinomialHeap()
     h.insert(1)
     assert h.find_min() == 1
+
 
 def test_binheap_find_min_2():
     h = BinomialHeap()
     h.insert(1)
     h.insert(0)
     assert h.find_min() == 0
+
 
 def test_binheap_find_min_3():
     h = BinomialHeap()
@@ -265,11 +273,13 @@ def test_binheap_find_min_3():
     h.insert(5)
     assert h.find_min() == 3
 
+
 def test_binheap_find_min_4():
     h = BinomialHeap()
     h.insert(0)
     h.insert(-1)
     assert h.find_min() == -1
+
 
 def test_binheap_find_min_large_random():
     """ Hypothesis only tests smallish lists by default, which is fine because
@@ -290,6 +300,7 @@ def test_binheap_find_min_large_random():
         h.insert(x)
     assert min(l) == h.find_min()
 
+
 @given(st.lists(st.integers(), min_size=1))
 def test_binheap_find_min_arb(v):
     m = min(v)
@@ -305,7 +316,9 @@ def test_binheap_find_min_arb(v):
 
     assert h.find_min() == m
 
+
 # meld tests
+
 
 def test_binheap_meld_1():
     h1 = BinomialHeap()
@@ -313,6 +326,7 @@ def test_binheap_meld_1():
 
     h1.meld(h2)
     assert h1.find_min() == None
+
 
 def test_binheap_meld_2():
     h1 = BinomialHeap()
@@ -323,6 +337,7 @@ def test_binheap_meld_2():
     h1.meld(h2)
     assert h1.find_min() == 1
 
+
 def test_binheap_meld_3():
     h1 = BinomialHeap()
     h1.insert(3)
@@ -332,6 +347,7 @@ def test_binheap_meld_3():
 
     h1.meld(h2)
     assert h1.find_min() == 2
+
 
 def test_binheap_meld_4():
     h1 = BinomialHeap()
@@ -346,6 +362,7 @@ def test_binheap_meld_4():
 
     h1.meld(h2)
     assert h1.find_min() == 3
+
 
 @given(st.lists(st.integers(), min_size=1))
 def test_binheap_meld_one_empty_arb(v):
@@ -369,7 +386,8 @@ def test_binheap_meld_one_empty_arb(v):
     h1.meld(h2)
     assert h1.find_min() == min(v)
 
-@given(st.lists(st.integers(), min_size = 1), st.lists(st.integers(), min_size = 1))
+
+@given(st.lists(st.integers(), min_size=1), st.lists(st.integers(), min_size=1))
 def test_binheap_meld_arb(v1, v2):
     h1 = BinomialHeap()
     h2 = BinomialHeap()
@@ -382,7 +400,9 @@ def test_binheap_meld_arb(v1, v2):
     h1.meld(h2)
     assert h1.find_min() == min(min(v1), min(v2))
 
+
 # delete_min tests
+
 
 def test_binheap_delete_min_1():
     h = BinomialHeap()
@@ -394,6 +414,7 @@ def test_binheap_delete_min_1():
 
     h.delete_min()
     assert h.find_min() == None
+
 
 def test_binheap_delete_min_empty_err():
     h = BinomialHeap()
@@ -414,6 +435,7 @@ def test_binheap_delete_min_empty_err():
     except IndexError as err:
         assert "Delete min from empty heap" in str(err)
 
+
 @given(st.lists(st.integers(), min_size=1))
 def test_binheap_delete_min_arb(v):
     """ Do a heapsort using the binomial heap, make sure it gives the same
@@ -429,15 +451,16 @@ def test_binheap_delete_min_arb(v):
         h.delete_min()
 
 
-
 ## Binomial tree tests
 
 # Value tests
+
 
 def test_bintree_1():
     bt = _BinTree(1)
     assert bt.rank == 0
     assert bt.value == 1
+
 
 @given(st.integers())
 def test_bintree_val_arb(x):
@@ -445,7 +468,9 @@ def test_bintree_val_arb(x):
     assert bt.rank == 0
     assert bt.value == x
 
+
 # Link tests
+
 
 def test_bintree_link_2():
     t1 = _BinTree(1)
@@ -467,6 +492,7 @@ def test_bintree_link_2():
     assert t1.rank == 0
     assert t2.rank == 1
     assert t2.value == 1
+
 
 def test_bintree_link_3():
     t1 = _BinTree(1)
@@ -497,6 +523,7 @@ def test_bintree_link_3():
     t1.link(t3)
     assert t1.value == 2
 
+
 @given(st.lists(st.integers(), min_size=8, max_size=8))
 def test_bintree_link_arb_4(v):
     """ Test that we get the right min in a tree of rank 3. """
@@ -523,14 +550,15 @@ def test_bintree_link_arb_4(v):
 
     assert t1.value == m
 
+
 def test_bintree_link_diff_rank():
     t1 = _BinTree(4)
     t2 = _BinTree(3)
     t3 = _BinTree(2)
 
-    t1.link(t2) # rank 0, rank 0
+    t1.link(t2)  # rank 0, rank 0
     try:
-        t1.link(t3) # rank 1, rank 0 -> error
+        t1.link(t3)  # rank 1, rank 0 -> error
     except ValueError as err:
         assert "Cannot link binomial trees of differing ranks:" in str(err)
 
@@ -547,10 +575,12 @@ def test_bintree_link_diff_rank():
 # should be - so you either have to test it during the creation, or
 # re-implement the code in `BinomialHeap:delete_min`.
 
+
 def test_bintree_children_1():
     t1 = _BinTree(0)
     children = t1.pop_children()
     assert len(children) == 0
+
 
 def test_bintree_children_2():
     t1 = _BinTree(0)
@@ -569,6 +599,7 @@ def test_bintree_children_2():
     children = t1.pop_children()
     assert len(children) == 1
     assert children[0].value == 1
+
 
 @given(st.lists(st.integers(), min_size=8, max_size=8))
 def test_bintree_children_arb_4(v):
@@ -598,4 +629,3 @@ def test_bintree_children_arb_4(v):
     assert len(children) == 3
     for i in range(0, 3):
         assert children[i].rank == i
-

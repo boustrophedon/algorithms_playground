@@ -8,16 +8,17 @@ from sklearn import linear_model
 
 # TODO: use actual statistical tests instead of just looking at r-squared. currently we validate the parameters as a check for poor fit because you can get a high r-squared with an incorrect model, but I'm sure there are models where the parameters look good and the r-squared is also good.
 
+
 class BigOModel:
     def fit(self, x, y):
         x = self.transform(np.array(x))
         y = np.array(y)
 
         self.model = linear_model.LinearRegression()
-        self.model.fit(x,y)
+        self.model.fit(x, y)
 
         self.params = (self.model.coef_, self.model.intercept_)
-        self.score = self.model.score(x,y)
+        self.score = self.model.score(x, y)
 
     def predict(self, x):
         return self.func(x, *self.params)
@@ -36,18 +37,22 @@ class BigOModel:
     def assert_bad_params(self):
         assert (self.params[0] < 1).any() or self.params[1] < 0
 
+
 class Onlogn(BigOModel):
     def transform(self, x):
-        return np.multiply(x, np.log2(x)).reshape(-1,1)
+        return np.multiply(x, np.log2(x)).reshape(-1, 1)
 
     def func(self, x, a, b):
-        return a*x*np.log2(x) + b
+        return a * x * np.log2(x) + b
+
 
 class Onsquared(BigOModel):
     def transform(self, x):
-        return np.multiply(x, x).reshape(-1,1)
+        return np.multiply(x, x).reshape(-1, 1)
+
     def func(self, x, a, b):
-        return a*x*x + b
+        return a * x * x + b
+
 
 def test_model_nlogn():
     np.random.seed(1766)
@@ -67,6 +72,7 @@ def test_model_nlogn():
     model.assert_good_params()
     assert model.score > 0.99
 
+
 def test_model_nsquared():
     np.random.seed(1766)
 
@@ -85,7 +91,8 @@ def test_model_nsquared():
     model.assert_good_params()
     assert model.score > 0.99
 
-# Test that params are bad with 
+
+# Test that params are bad with
 def test_model_incorrect_nsquared():
     np.random.seed(1766)
 
@@ -101,6 +108,7 @@ def test_model_incorrect_nsquared():
     print(model.score)
 
     model.assert_bad_params()
+
 
 def test_model_incorrect_nlogn():
     np.random.seed(1766)

@@ -23,7 +23,7 @@ class Graph:
     def has_edge(self, v1, v2):
         # map gets us the vertex out of the (v2, weight) tuple
         return v2 in map(lambda x: x[0], self.adj_list[v1])
-    
+
     # Returns a dict whose keys are the vertices of the graph (target vertices)
     # and the values are a shortest path from `start_vertex` to that vertex.
     # Each path is a list of edges, with the first edge's starting vertex being
@@ -56,7 +56,7 @@ class Graph:
         while queue:
             # select minimum-length edge from margin
             # pop-min operation on margin data structure
-            current = min(queue, key = lambda x: distances[x])
+            current = min(queue, key=lambda x: distances[x])
             queue.remove(current)
 
             # when we pop a vertex from the queue, we are guaranteed to know the
@@ -64,7 +64,7 @@ class Graph:
             # check it again.
             visited.add(current)
 
-            for n,w in self.adj_list[current]:
+            for n, w in self.adj_list[current]:
                 if n in visited:
                     continue
 
@@ -75,7 +75,7 @@ class Graph:
                 # then replace the old path with the path going through the current vertex
                 if n not in distances or dist_to_neighbor < distances[n]:
                     distances[n] = dist_to_neighbor
-                    predecessors[n] = (current,w)
+                    predecessors[n] = (current, w)
                     queue.add(n)
 
         # compute the output paths by following the predecessors backwards
@@ -96,6 +96,7 @@ class Graph:
 
         return output
 
+
 # Connected weighted graph generator, reused from mst_slow.py
 
 # I am not sure if there are graphs this method cannot generate
@@ -108,12 +109,12 @@ class Graph:
 # spanning tree first, but eg the first vertex we pick has a higher probability
 # of having a higher degree than the last vertex picked.
 def gen_weighted_connected_graph(num_vertices, num_edges, max_weight):
-    assert num_edges >= num_vertices-1
+    assert num_edges >= num_vertices - 1
 
     g = Graph()
 
-    v_used = [0,]
-    v_unused = list(range(1,num_vertices))
+    v_used = [0]
+    v_unused = list(range(1, num_vertices))
 
     edges_remaining = num_edges
     while edges_remaining > 0:
@@ -138,78 +139,86 @@ def gen_weighted_connected_graph(num_vertices, num_edges, max_weight):
 
     return g
 
+
 # Tests
 
 import random
 
+
 def test_one_edge():
     g = Graph()
-    g.add_edge(0,1,1)
+    g.add_edge(0, 1, 1)
 
     paths = g.shortest_paths(0)
     assert len(paths) == 1
-    assert paths[1] == [(0,1,1)]
+    assert paths[1] == [(0, 1, 1)]
+
 
 def test_two_edges_line():
     g = Graph()
-    g.add_edge(0,1,1)
-    g.add_edge(1,2,1)
+    g.add_edge(0, 1, 1)
+    g.add_edge(1, 2, 1)
 
     paths = g.shortest_paths(0)
     assert len(paths) == 2
-    assert paths[1] == [(0,1,1)]
-    assert paths[2] == [(0,1,1), (1,2,1)]
+    assert paths[1] == [(0, 1, 1)]
+    assert paths[2] == [(0, 1, 1), (1, 2, 1)]
+
 
 def test_two_edges_spoke():
     g = Graph()
-    g.add_edge(0,1,1)
-    g.add_edge(0,2,1)
+    g.add_edge(0, 1, 1)
+    g.add_edge(0, 2, 1)
 
     paths = g.shortest_paths(0)
     assert len(paths) == 2
-    assert paths[1] == [(0,1,1)]
-    assert paths[2] == [(0,2,1)]
+    assert paths[1] == [(0, 1, 1)]
+    assert paths[2] == [(0, 2, 1)]
+
 
 def test_diamond_equal_weights():
     g = Graph()
-    g.add_edge(0,1,1)
-    g.add_edge(0,2,1)
-    g.add_edge(1,3,1)
-    g.add_edge(2,3,1)
+    g.add_edge(0, 1, 1)
+    g.add_edge(0, 2, 1)
+    g.add_edge(1, 3, 1)
+    g.add_edge(2, 3, 1)
 
     # this is implementation dependent but we could probably make it not so by
     # taking the lowest-numbered (or total-lowest-numbered? i haven't thought
     # this through) path
     paths = g.shortest_paths(0)
     assert len(paths) == 3
-    assert paths[1] == [(0,1,1)]
-    assert paths[2] == [(0,2,1)]
-    assert paths[3] == [(0,1,1), (1,3,1)]
+    assert paths[1] == [(0, 1, 1)]
+    assert paths[2] == [(0, 2, 1)]
+    assert paths[3] == [(0, 1, 1), (1, 3, 1)]
+
 
 def test_diamond_unique_weights():
     g = Graph()
-    g.add_edge(0,1,1)
-    g.add_edge(0,2,1)
-    g.add_edge(1,3,2) # path that was selected in previous test is now higher-weight
-    g.add_edge(2,3,1)
+    g.add_edge(0, 1, 1)
+    g.add_edge(0, 2, 1)
+    g.add_edge(1, 3, 2)  # path that was selected in previous test is now higher-weight
+    g.add_edge(2, 3, 1)
 
     paths = g.shortest_paths(0)
     assert len(paths) == 3
-    assert paths[1] == [(0,1,1)]
-    assert paths[2] == [(0,2,1)]
-    assert paths[3] == [(0,2,1), (2,3,1)]
+    assert paths[1] == [(0, 1, 1)]
+    assert paths[2] == [(0, 2, 1)]
+    assert paths[3] == [(0, 2, 1), (2, 3, 1)]
+
 
 def test_triangle_shorter_total():
     g = Graph()
-    g.add_edge(0,1,1)
-    g.add_edge(1,2,1)
+    g.add_edge(0, 1, 1)
+    g.add_edge(1, 2, 1)
 
-    g.add_edge(0,2,3)
+    g.add_edge(0, 2, 3)
 
     paths = g.shortest_paths(0)
     assert len(paths) == 2
-    assert paths[1] == [(0,1,1)]
-    assert paths[2] == [(0,1,1), (1,2,1)]
+    assert paths[1] == [(0, 1, 1)]
+    assert paths[2] == [(0, 1, 1), (1, 2, 1)]
+
 
 # TODO: determine how to property test/validate that paths are shortest
 # easy sanity checks: path length is bounded by number of vertices (i.e. no repeated vertices)

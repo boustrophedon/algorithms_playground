@@ -8,14 +8,17 @@ from algo.bench.models import Onlogn
 
 
 def run_merge_benches_reversed(start_size, end_size, step_size, trials_per_array):
-    test_arrays = [(n, list(reversed(range(0,n)))) for n in range(start_size, end_size, step_size)]
+    test_arrays = [
+        (n, list(reversed(range(0, n)))) for n in range(start_size, end_size, step_size)
+    ]
 
     results = list()
-    for n,v in test_arrays:
+    for n, v in test_arrays:
         result = timeit.timeit(lambda: mergesort(v), number=trials_per_array)
         results.append((n, result))
 
     return results
+
 
 def test_bench_mergesort():
     results = run_merge_benches_reversed(100, 10000, 50, 100)
@@ -24,10 +27,11 @@ def test_bench_mergesort():
     y = [t[1] for t in results]
 
     model = Onlogn()
-    model.fit(x,y)
+    model.fit(x, y)
 
     model.assert_good_params()
     assert model.score > 0.99
+
 
 def show_mergesort_reversed_graph():
     print("Running benches")
@@ -47,7 +51,7 @@ def show_mergesort_reversed_graph():
     plt.title("Mergesort on a reversed (n...0) array of integers")
     plt.xlabel("array size")
     plt.ylabel("runtime in seconds")
-    plt.plot(x,y, "o-")
+    plt.plot(x, y, "o-")
 
     print("Saving figure to /tmp/mergesort_reversed.png")
     plt.savefig("/tmp/mergesort_reversed.png")
@@ -55,5 +59,5 @@ def show_mergesort_reversed_graph():
     plt.show()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     show_mergesort_reversed_graph()
