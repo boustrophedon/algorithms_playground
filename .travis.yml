@@ -9,4 +9,5 @@ script:
         - pipenv run mypy algo/
         - pipenv run pytest
         - pipenv run black --check algo/
+        - pipenv run flake8 algo/
 python: 3.6
