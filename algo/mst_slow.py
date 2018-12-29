@@ -65,7 +65,7 @@ class Graph:
             v1, v2, _ = edge
 
             # both vertices are in the same component: skip it
-            if components.get(v1) == components.get(v2) != None:
+            if components.get(v1) == components.get(v2) is not None:
                 continue
             # neither vertex is part of a component: make new component
             elif v1 not in components and v2 not in components:

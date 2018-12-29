@@ -1,5 +1,6 @@
 # This isn't in Kozen but I just felt like doing something relatively easy and also it gives me an excuse to use Hypothesis.
 
+
 # Given an list of comparables, return a new list containing the same items in
 # the input in sorted order. I say "comparables" but I only really test on
 # integers, it's just that the code only uses the < operator. This
@@ -147,39 +148,39 @@ def test_msort_arb(v):
 
 
 def test_merge_empty():
-    l = []
-    r = []
-    result = merge(l, r)
+    a = []
+    b = []
+    result = merge(a, b)
 
     assert result == []
 
 
 def test_merge_single_empty():
-    l = [1]
-    r = []
-    result = merge(l, r)
+    a = [1]
+    b = []
+    result = merge(a, b)
 
     assert result == [1]
 
-    # and the other way
-    l = []
-    r = [1]
-    result = merge(l, r)
+    # and the otheb way
+    a = []
+    b = [1]
+    result = merge(a, b)
 
     assert result == [1]
 
 
 def test_merge_singles():
-    l = [1]
-    r = [2]
-    result = merge(l, r)
+    a = [1]
+    b = [2]
+    result = merge(a, b)
 
     assert result == [1, 2]
 
     # and the other way
-    l = [2]
-    r = [1]
-    result = merge(l, r)
+    a = [2]
+    b = [1]
+    result = merge(a, b)
 
     assert result == [1, 2]
 
@@ -210,11 +211,11 @@ def test_merge_pairs():
 
 
 @given(st.lists(st.integers()), st.lists(st.integers()))
-def test_merge_list_arb(l, r):
+def test_merge_list_arb(a, b):
     # inputs must be sorted
-    l = sorted(l)
-    r = sorted(r)
+    a = sorted(a)
+    b = sorted(b)
 
-    result = merge(l, r)
+    result = merge(a, b)
 
-    assert result == sorted(l + r)
+    assert result == sorted(a + b)

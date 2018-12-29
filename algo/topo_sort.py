@@ -1,6 +1,7 @@
 from collections import defaultdict
 import random
 
+
 # Creates a directed graph stored as an adjacency list, where each element in
 # the list contains a list of incoming and outgoing edges, represented by the
 # vertex on the other end. Technically I guess the vertices can be anything
@@ -65,6 +66,7 @@ class Graph:
 import pytest
 
 ## Test Utilities
+
 
 # Check that the sort order is viable
 def assert_topo_sort(graph, order):

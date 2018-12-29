@@ -1,0 +1,10 @@
+[flake8]
+# E266 is multiple # in a comment, which I use for headings
+# E501 is line length, which black is in charge of and flake8 produces false
+# positives for long comments, esp. ones with long URLs (this has something to
+# do with a bug in PEP8)
+# E402 is module imports not at the top of the file, which I use to import pytest and hypothesis where the tests are at the bottom of the files. This is intentional.
+ignore = E266, E501, E402
+
+# same as default for black
+max-line-length = 88

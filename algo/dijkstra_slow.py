@@ -6,6 +6,7 @@
 
 from collections import defaultdict
 
+
 # Reused graph class from mst_slow.py
 # With modification to reject negative edge-weights
 class Graph:

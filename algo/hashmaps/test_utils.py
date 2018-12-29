@@ -73,4 +73,4 @@ def test_maps_not_equal(d: Dict[int, str]):
 
     result = check_maps_equal(items, BadDict())
 
-    assert result[0] == False, "Test passed with BadDict"
+    assert result[0] is False, "Test passed with BadDict"

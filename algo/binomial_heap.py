@@ -45,7 +45,7 @@ class BinomialHeap:
             key=lambda x: x[1],
             # if there are no trees in self._trees, just return None
             default=(None, None),
-        )[0] # then use the resulting index from the min tuple
+        )[0]  # then use the resulting index from the min tuple
         # fmt: on
 
     def find_min(self) -> Optional[E]:
@@ -204,8 +204,8 @@ class _BinTree:
 
     def pop_children(self) -> List["_BinTree"]:
         """ Returns the children of the root of this tree, which should be a
-        list of `_BinTree`s of increasing rank. 
-        
+        list of `_BinTree`s of increasing rank.
+
         You should not use this object after calling this method.
         """
 
@@ -217,7 +217,7 @@ class _BinTree:
         """ Combine this tree with `other` to create a new tree of rank k+1.
         The root of this tree will become the smaller of this tree or the other
         tree's root.
-        
+
         You should not `link(x, x)`. Additionally, you should not use `other`
         after using it as an argument to link.
         """
@@ -286,19 +286,19 @@ def test_binheap_find_min_large_random():
     then it can run more tests in a reasonable amount of time. Here we test a larger list. """
     h = BinomialHeap()
     # the range is only 200, so we are guaranteed to have duplicates
-    l = [random.randint(-100, 100) for _ in range(0, 10000)]
+    v = [random.randint(-100, 100) for _ in range(0, 10000)]
 
     # insert in random order
-    for x in l:
+    for x in v:
         h.insert(x)
-    assert min(l) == h.find_min()
+    assert min(v) == h.find_min()
 
     # insert in reverse-sorted order
     h = BinomialHeap()
-    ls = sorted(l)
-    for x in l[::-1]:
+    v_rev = sorted(v)
+    for x in v_rev[::-1]:
         h.insert(x)
-    assert min(l) == h.find_min()
+    assert min(v) == h.find_min()
 
 
 @given(st.lists(st.integers(), min_size=1))
@@ -325,7 +325,7 @@ def test_binheap_meld_1():
     h2 = BinomialHeap()
 
     h1.meld(h2)
-    assert h1.find_min() == None
+    assert h1.find_min() is None
 
 
 def test_binheap_meld_2():
@@ -413,7 +413,7 @@ def test_binheap_delete_min_1():
     assert h.find_min() == 2
 
     h.delete_min()
-    assert h.find_min() == None
+    assert h.find_min() is None
 
 
 def test_binheap_delete_min_empty_err():
@@ -428,7 +428,7 @@ def test_binheap_delete_min_empty_err():
     assert h.find_min() == 7
 
     h.delete_min()
-    assert h.find_min() == None
+    assert h.find_min() is None
 
     try:
         h.delete_min()
