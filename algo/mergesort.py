@@ -1,17 +1,16 @@
-# This isn't in Kozen but I just felt like doing something relatively easy and also it gives me an excuse to use Hypothesis.
-
-
-# Given an list of comparables, return a new list containing the same items in
-# the input in sorted order. I say "comparables" but I only really test on
-# integers, it's just that the code only uses the < operator. This
-# implementation should be a stable sort but I don't have any tests for it.
-#
 # I'm using a bottom-up non-recursive approach because I don't think I've
 # written a non-recursive merge sort before. We push each element of the input
 # onto a queue as a single-element list, and then traverse the queue in pairs
 # and merge them, pushing them onto a different queue. Then we swap the queues
 # and continue until there's only one element left, which is the result.
 def mergesort(v):
+    """
+    Given a list of comparables, return a new list containing the same items in
+    the input in sorted order. I say "comparables" but I only really test on
+    integers, it's just that the code only uses the < operator. This
+    implementation should be a stable sort but I don't have any tests for it.
+    """
+
     if len(v) < 2:
         return list(v)
 
@@ -46,8 +45,8 @@ def mergesort(v):
     return front_queue.pop()
 
 
-# Given two sorted lists, merge them into a single, new sorted list
 def merge(l, r):
+    """ Given two sorted lists, merge them into a single, new sorted list """
     output = list()
 
     l_current = 0

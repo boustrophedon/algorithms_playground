@@ -31,8 +31,8 @@ class BigOModel:
     # get a leading coefficient <1. It's just very unlikely to actually happen
     # when it's actually implemented in code.
     def assert_good_params(self):
-        assert (self.params[0] > 1).all()
-        assert self.params[1] > 0
+        assert (self.params[0] > 1).all(), self.params
+        assert self.params[1] > 0, self.params
 
     def assert_bad_params(self):
         assert (self.params[0] < 1).any() or self.params[1] < 0

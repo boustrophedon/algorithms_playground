@@ -4,7 +4,8 @@
 # positives for long comments, esp. ones with long URLs (this has something to
 # do with a bug in PEP8)
 # E402 is module imports not at the top of the file, which I use to import pytest and hypothesis where the tests are at the bottom of the files. This is intentional.
-ignore = E266, E501, E402
+# E302 is blank lines before new functions and flake8 treats comments differently than black, so again we leave it to black
+ignore = E266, E501, E402, E302
 
 # same as default for black
 max-line-length = 88
