@@ -20,6 +20,9 @@ def get_blocks(m):
 
 
 def strassen(m1, m2):
+    """ Multiply matrices m1 and m2 using the Strassen algorithm. m1 and m2
+    must be square, power-of-2-sized matrices. """
+
     # assert matrices have same size and are square
     assert m1.shape == m2.shape
     assert m1.shape[0] == m1.shape[1]
