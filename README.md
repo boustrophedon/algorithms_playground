@@ -43,7 +43,7 @@ Just practice implementing some algorithms for interview prep, mostly from Kozen
 
 # Running the code
 
-To run the tests for a given python file, have pipenv installed, install dependencies with `pipenv install --dev` and run `pipenv run pytest <python_file>`.
+To run the tests for a given python file, have pipenv installed, install dependencies with `pipenv install --dev --pre` and run `pipenv run pytest <python_file>`.
 
 To run all tests you just run `pytest`.
 

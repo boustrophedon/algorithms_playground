@@ -15,7 +15,7 @@ matplotlib = "*"
 pudb = "*"
 pytest-pudb = "*"
 mypy = "*"
-"flake8" = "*"
+flake8 = "*"
 black = "*"
 
 [requires]
