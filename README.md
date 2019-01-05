@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/boustrophedon/algorithms_practice.svg?branch=master)](https://travis-ci.org/boustrophedon/algorithms_practice)
+[![Build Status](https://travis-ci.org/boustrophedon/algorithms_playground.svg?branch=master)](https://travis-ci.org/boustrophedon/algorithms_playground)
 
 Just practice implementing some algorithms for interview prep, mostly from Kozen's Design and Analysis of Algorithms.
 
@@ -28,6 +28,7 @@ Just practice implementing some algorithms for interview prep, mostly from Kozen
 - [ ] Maybe faster hash functions (many blog posts about this)
 
 ## Collections
+- [~] Linked list just for fun
 - [x] Binomial heaps
 - [ ] Fibonacci heaps
 - [ ] Pairing heap
