@@ -73,7 +73,17 @@ class LinkedList(Generic[E]):
 
         O(n*O(f)) time.
         """
-        raise NotImplementedError
+        ctx = initial_context
+        curr = self._head
+
+        while curr is not None:
+            try:
+                ctx = f(ctx, curr.value)
+            except StopIteration as end:
+                return end.value
+            curr = curr.next
+
+        return ctx
 
     def count(self) -> int:
         """ Returns the number of items in the linked list. O(n) time. """
@@ -91,10 +101,140 @@ import hypothesis.strategies as st
 
 ### Linked List tests
 
-# Head is empty at start
-def test_ll_head_empty():
+
+## Traverse tests
+
+# Traverse test helper functions
+def empty(ctx, x):
+    None
+
+
+def assert_on_call(ctx, x):
+    assert False, "should not be called"
+
+
+def count_items(ctx, x):
+    return ctx + 1
+
+
+class CounterStop:
+    def __init__(self, stop_at):
+        self.stop_at = stop_at
+        self.count = 0
+
+
+def end_at_item(ctx, x):
+    """ Stop at the item equal to x, or at the last item if none are equal to
+    x. """
+    ctx.count += 1
+    if ctx.stop_at == x:
+        raise StopIteration(ctx)
+    else:
+        return ctx
+
+
+# make sure f is not called if the linked list is empty, but we get back the
+# context
+def test_ll_traverse_empty():
     ll = LinkedList()
-    assert ll.head() is None
+    result = ll.traverse(assert_on_call, "test")
+    assert result == "test"
+
+
+def test_ll_traverse_hits_every_element():
+    ll = LinkedList()
+    # check with one element
+    ll.append("a")
+    result = ll.traverse(count_items, 0)
+    assert result == 1
+
+    # check with two elements
+    ll.append("b")
+    result = ll.traverse(count_items, 0)
+    assert result == 2
+
+    # check with three elements
+    ll.append("c")
+    result = ll.traverse(count_items, 0)
+    assert result == 3
+
+
+def test_ll_traverse_stop_iteration():
+    ll = LinkedList()
+    ll.append("a")
+    ll.append("b")
+    ll.append("c")
+    ll.append("d")
+
+    # stop at first
+    result = ll.traverse(end_at_item, CounterStop("a"))
+    assert result.count == 1
+
+    # stop at second
+    result = ll.traverse(end_at_item, CounterStop("b"))
+    assert result.count == 2
+
+    # stop at third
+    result = ll.traverse(end_at_item, CounterStop("c"))
+    assert result.count == 3
+
+    # stop element not in list
+    result = ll.traverse(end_at_item, CounterStop("x"))
+    assert result.count == 4
+
+    # add new element and stop element still not in list, but count increases
+    ll.append("e")
+    result = ll.traverse(end_at_item, CounterStop("x"))
+    assert result.count == 5
+
+
+@given(st.lists(st.integers()))
+def test_ll_traverse_hits_every_element_arb(v):
+    ll = LinkedList()
+    for i, x in enumerate(v):
+        ll.append(x)
+        result = ll.traverse(count_items, 0)
+        # i+1 is the number of elements since enumerate starts at 0
+        assert result == i + 1
+
+    # finally, check again (even though it's the same as the last iteration in
+    # the above loop) that the total number of items is the same
+    result = ll.traverse(count_items, 0)
+    assert result == len(v)
+
+
+# set 1 is all negative numbers, and set 2 is all positive numbers, so they can't intersect
+# it really doesn't matter what the elements are for this test
+#
+# Note that they are sets, because end_at_item stops at the first item, which
+# may not otherwise be unique
+@given(st.sets(st.integers(max_value=0)), st.sets(st.integers(min_value=1)))
+def test_ll_traverse_stop_iteration_arb(v1, v2):
+    ll = LinkedList()
+    for x in v1:
+        ll.append(x)
+
+    # Count the number of elements we traverse
+    for i, x in enumerate(v1):
+        # stop at x
+        result = ll.traverse(end_at_item, CounterStop(x))
+        # i+1 is the number of elements since enumerate starts at 0
+        assert result.count == i + 1
+
+    # now do it in reverse for good measure
+    for i, x in reversed(list(enumerate(v1))):
+        # stop at x
+        result = ll.traverse(end_at_item, CounterStop(x))
+        # i+1 is the number of elements since enumerate starts at 0
+        assert result.count == i + 1
+
+    # Now since every element of v2 isn't in v1 and subsequently the list
+    # Check that we traverse the whole list when searching for them
+    for x in v2:
+        result = ll.traverse(end_at_item, CounterStop(x))
+
+        # v1 items inserted into list
+        assert result.count == len(v1)
 
 
 ## Append tests
@@ -131,6 +271,13 @@ def test_ll_append_arb(v):
 
     # after going through all the elements, check we've hit None at the end
     assert curr is None
+
+
+## Misc tests
+# Head is empty at start
+def test_ll_head_empty():
+    ll = LinkedList()
+    assert ll.head() is None
 
 
 ### Node tests (very brief, it just holds data)
