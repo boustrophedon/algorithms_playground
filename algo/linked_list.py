@@ -39,7 +39,13 @@ class LinkedList(Generic[E]):
         """ Prepends the element `e` to the front of the linked list, making it
         the new head. O(1) time.
         """
-        raise NotImplementedError
+        new_node = Node(e, None)
+        if self._head is None:
+            self._head = new_node
+            return
+
+        new_node.next = self._head
+        self._head = new_node
 
     def pop(self) -> E:
         """ Returns the tail element of the linked list. Throws an exception if
@@ -240,6 +246,45 @@ def test_ll_traverse_stop_iteration_arb(v1, v2):
         assert result.count == len(v1)
 
 
+## Prepend tests
+# Test that head is properly updated when prepending to empty list
+def test_ll_prepend_1():
+    ll = LinkedList()
+    ll.prepend(1)
+
+    assert ll.head().value == 1
+    assert ll.head().next is None
+
+
+def test_ll_prepend_2():
+    ll = LinkedList()
+    ll.prepend(1)
+    ll.prepend(2)
+
+    assert ll.head().value == 2
+    assert ll.head().next is not None
+
+    assert ll.head().next.value == 1
+    assert ll.head().next.next is None
+
+
+# prepend elements of a list to LinkedList, then check they are there in the
+# reverse order as the original
+@given(st.lists(st.integers()))
+def test_ll_prepend_arb(v):
+    ll = LinkedList()
+    for x in v:
+        ll.prepend(x)
+
+    curr = ll.head()
+    for i in reversed(range(0, len(v))):
+        assert curr.value == v[i]
+        curr = curr.next
+
+    # after going through all the elements, check we've hit None at the end
+    assert curr is None
+
+
 ## Append tests
 # Test that head is properly updated when appending to empty list
 def test_ll_append_1():
@@ -257,6 +302,9 @@ def test_ll_append_2():
 
     assert ll.head().value == 1
     assert ll.head().next is not None
+
+    assert ll.head().next.value == 2
+    assert ll.head().next.next is None
 
 
 # append elements of a list to LinkedList, then check they are there in the
