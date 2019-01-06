@@ -48,13 +48,13 @@ class LinkedList(Generic[E]):
         self._head = new_node
 
     def pop(self) -> E:
-        """ Returns the tail element of the linked list. Throws an exception if
-        the linked list is empty. O(n) time. """
+        """ Returns and removes the tail element of the linked list. Throws an
+        exception if the linked list is empty. O(n) time. """
         raise NotImplementedError
 
     def popleft(self) -> E:
-        """ Returns the head element of the linked list. Throws an exception if
-        the linked list is empty. O(1) time. """
+        """ Returns and removes the head element of the linked list. Throws an
+        exception if the linked list is empty. O(1) time. """
         raise NotImplementedError
 
     # FIXME: should I use a context parameter or just `...`, which is apparently legal
@@ -88,6 +88,46 @@ class LinkedList(Generic[E]):
         while curr is not None:
             try:
                 ctx = f(ctx, curr.value)
+            except StopIteration as end:
+                return end.value
+            curr = curr.next
+
+        return ctx
+
+    # I didn't bother writing tests for this as it's essentially the same code as traverse above
+    # FIXME: technically I should just write traverse in terms of
+    # traverse_nodes by unwrapping the node's value.
+    def traverse_nodes(
+        self, f: Callable[[Ctx, Node[E]], Ctx], initial_context: Ctx
+    ) -> Ctx:
+        """
+        Call f(ctx, e) -> ctx on every node of the linked list.
+        Traversal ends when either the function raises a StopIteration
+        or when we reach the last node of the list.
+
+        That is, the return type of `f` is a context object that gets updated each
+        iteration starting with `initial_context`, and the return type of
+        `traverse` is the resulting final ctx object when iteration has ended.
+
+        If `StopIteration` is used to return early from the iteration, the
+        `value` attribute on the StopIteration exception will be used as the
+        return value.
+
+        We return the ctx from `f` so that it's easier to use with
+        immutable objects, e.g. ints and strings. Otherwise, to implement, e.g.
+        count() as below, you'd have to wrap them in a container.
+
+        This function is similar to a fold or reduce, but it doesn't
+        necessarily consume the elements of the list and you can stop early.
+
+        O(n*O(f)) time.
+        """
+        ctx = initial_context
+        curr = self._head
+
+        while curr is not None:
+            try:
+                ctx = f(ctx, curr)
             except StopIteration as end:
                 return end.value
             curr = curr.next
