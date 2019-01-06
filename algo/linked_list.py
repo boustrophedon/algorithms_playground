@@ -91,7 +91,19 @@ class LinkedList(Generic[E]):
     def popleft(self) -> E:
         """ Returns and removes the head element of the linked list. Throws an
         `Empty` exception if the linked list is empty. O(1) time. """
-        raise NotImplementedError
+        if self._head is None:
+            raise Empty()
+
+        # special case for removing the last node
+        if self._head.next is None:
+            result = self._head.value
+            self._head = None
+            return result
+
+        result = self._head.value
+        self._head = self._head.next
+
+        return result
 
     # FIXME: should I use a context parameter or just `...`, which is apparently legal
     # See https://docs.python.org/3/library/typing.html#callable
@@ -395,6 +407,81 @@ def test_ll_pop_interspersed_arb(v1, v2):
         assert (
             False
         ), f"Non-empty exception raised when popping from empty list: {type(err)}"
+
+
+## Popleft tests
+def test_ll_popleft_empty():
+    ll = LinkedList()
+    try:
+        ll.popleft()
+    except Empty:
+        pass  # We should get empty
+    except Exception as err:
+        assert (
+            False
+        ), f"Non-empty exception raised when popleft from empty list: {type(err)}"
+
+
+def test_ll_popleft_1():
+    ll = LinkedList()
+    ll.append(1)
+    assert ll.popleft() == 1
+
+
+def test_ll_popleft_2():
+    ll = LinkedList()
+    ll.append(1)
+    ll.append(2)
+    assert ll.popleft() == 1
+    assert ll.popleft() == 2
+
+
+# TODO: use hypothesis rule-based model testing
+@given(st.lists(st.integers()))
+def test_ll_popleft_in_order_arb(v):
+    ll = LinkedList()
+    for x in v:
+        ll.append(x)
+
+    for x in v:
+        assert ll.popleft() == x
+
+    # make sure that we get empty exception once we've popped everything
+    try:
+        ll.popleft()
+    except Empty:
+        pass  # We should get empty
+    except Exception as err:
+        assert (
+            False
+        ), f"Non-empty exception raised when popleft from empty list: {type(err)}"
+
+
+@given(st.lists(st.integers()), st.lists(st.integers()))
+def test_ll_popleft_interspersed_arb(v1, v2):
+    """ Insert all elements of v1, then alternate between popleft and
+    prepending elements of v2 and v1. """
+    ll = LinkedList()
+    for x in v1:
+        ll.append(x)
+    for x in v1:
+        assert ll.popleft() == x
+
+        # now add element of v2 and check popleftping gives the correct element
+        if len(v2) > 0:
+            x2 = v2.pop(0)  # equivalent of popleft
+            ll.prepend(x2)
+            assert ll.popleft() == x2
+
+    # make sure that we get empty exception once we've popped everything
+    try:
+        ll.popleft()
+    except Empty:
+        pass  # We should get empty
+    except Exception as err:
+        assert (
+            False
+        ), f"Non-empty exception raised when popleft from empty list: {type(err)}"
 
 
 ## Prepend tests
