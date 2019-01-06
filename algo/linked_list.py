@@ -339,6 +339,7 @@ def test_ll_pop_empty():
     ll = LinkedList()
     try:
         ll.pop()
+        assert False, "Above line should throw exception."
     except Empty:
         pass  # We should get empty
     except Exception as err:
@@ -374,6 +375,7 @@ def test_ll_pop_in_order_arb(v):
     # make sure that we get empty exception once we've popped everything
     try:
         ll.pop()
+        assert False, "Above line should throw exception."
     except Empty:
         pass  # We should get empty
     except Exception as err:
@@ -401,6 +403,7 @@ def test_ll_pop_interspersed_arb(v1, v2):
     # make sure that we get empty exception once we've popped everything
     try:
         ll.pop()
+        assert False, "Above line should throw exception."
     except Empty:
         pass  # We should get empty
     except Exception as err:
@@ -414,6 +417,7 @@ def test_ll_popleft_empty():
     ll = LinkedList()
     try:
         ll.popleft()
+        assert False, "Above line should throw exception."
     except Empty:
         pass  # We should get empty
     except Exception as err:
@@ -449,6 +453,7 @@ def test_ll_popleft_in_order_arb(v):
     # make sure that we get empty exception once we've popped everything
     try:
         ll.popleft()
+        assert False, "Above line should throw exception."
     except Empty:
         pass  # We should get empty
     except Exception as err:
@@ -476,6 +481,7 @@ def test_ll_popleft_interspersed_arb(v1, v2):
     # make sure that we get empty exception once we've popped everything
     try:
         ll.popleft()
+        assert False, "Above line should throw exception."
     except Empty:
         pass  # We should get empty
     except Exception as err:
