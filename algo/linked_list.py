@@ -192,6 +192,15 @@ class LinkedList(Generic[E]):
         """
         raise NotImplementedError
 
+    def __iter__(self):
+        if self._head is None:
+            return
+
+        curr = self._head
+        while curr is not None:
+            yield curr.value
+            curr = curr.next
+
 
 from hypothesis import given
 import hypothesis.strategies as st
@@ -332,6 +341,59 @@ def test_ll_traverse_stop_iteration_arb(v1, v2):
 
         # v1 items inserted into list
         assert result.count == len(v1)
+
+
+## Iterator tests
+def test_ll_iterator_empty():
+    ll = LinkedList()
+    for x in ll:
+        assert False, "Inside iterator but no elements in list"
+
+
+def test_ll_iterator_single():
+    ll = LinkedList()
+
+    ll.append("test")
+    it = iter(ll)
+    assert next(it) == "test"
+    try:
+        next(it)
+        assert False, "Above line should throw exception."
+    except StopIteration:
+        pass
+    except Exception as err:
+        assert False, f"Other exception thrown inside iterator: {type(err)}"
+    else:
+        assert False, "No exception thrown at end of iteration"
+
+
+def test_ll_iterator_2():
+    ll = LinkedList()
+
+    ll.append("test1")
+    ll.append("test2")
+    it = iter(ll)
+
+    assert next(it) == "test1"
+    assert next(it) == "test2"
+    try:
+        next(it)
+        assert False, "Above line should throw exception."
+    except StopIteration:
+        pass
+    except Exception as err:
+        assert False, f"Other exception thrown inside iterator: {type(err)}"
+
+
+@given(st.lists(st.integers()))
+def test_ll_iterator_arb(v):
+    ll = LinkedList()
+
+    for x in v:
+        ll.append(x)
+
+    for x_ll, x_v in zip(ll, v):
+        assert x_ll == x_v
 
 
 ## Pop tests
