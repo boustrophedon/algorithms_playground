@@ -1,4 +1,4 @@
-from typing import TypeVar, Optional, Generic, Callable
+from typing import List, TypeVar, Optional, Generic, Callable
 
 # TODO: use hypothesis rule-based testing https://hypothesis.works/articles/rule-based-stateful-testing/
 
@@ -186,11 +186,18 @@ class LinkedList(Generic[E]):
         """ Returns the number of items in the linked list. O(n) time. """
         raise NotImplementedError
 
-    def pprint(self):
+    def pprint(self, file=None):
         """ Pretty print the values of the elements of the linked list,
-        separated by arrows.
+        separated by arrows. O(n)
         """
-        raise NotImplementedError
+
+        def print_node(buf: List[str], curr: Node[E]) -> List[str]:
+            buf.append(str(curr.value))
+            if curr.next is not None:
+                buf.append("->")
+            return buf
+
+        print(" ".join(self.traverse_nodes(print_node, list())), file=file)
 
     def __iter__(self):
         if self._head is None:
@@ -341,6 +348,55 @@ def test_ll_traverse_stop_iteration_arb(v1, v2):
 
         # v1 items inserted into list
         assert result.count == len(v1)
+
+
+## Pretty print tests
+
+from io import StringIO
+
+
+def test_ll_pprint_empty():
+    ll = LinkedList()
+    f = StringIO()
+
+    ll.pprint(file=f)
+    assert f.getvalue() == "\n"
+
+
+def test_ll_pprint_single_value():
+    ll = LinkedList()
+    f = StringIO()
+
+    ll.append(1)
+    ll.pprint(file=f)
+    assert f.getvalue() == "1\n"
+
+
+def test_ll_pprint_3():
+    ll = LinkedList()
+    f = StringIO()
+
+    ll.append(2)
+    ll.append(1)
+    ll.append(3)
+
+    ll.pprint(file=f)
+    assert f.getvalue() == "2 -> 1 -> 3\n"
+
+
+@given(st.lists(st.integers(), min_size=2))
+def test_ll_pprint_arb(v):
+    ll = LinkedList()
+    f = StringIO()
+    for x in v:
+        ll.append(x)
+
+    ll.pprint(file=f)
+    contents = f.getvalue()
+    for x in v:
+        assert str(x) in contents
+
+    assert contents.count("->") == len(v) - 1
 
 
 ## Iterator tests
