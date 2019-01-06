@@ -71,6 +71,9 @@ class LinkedList(Generic[E]):
         immutable objects, e.g. ints and strings. Otherwise, to implement, e.g.
         count() as below, you'd have to wrap them in a container.
 
+        This function is similar to a fold or reduce, but it doesn't
+        necessarily consume the elements of the list and you can stop early.
+
         O(n*O(f)) time.
         """
         ctx = initial_context
