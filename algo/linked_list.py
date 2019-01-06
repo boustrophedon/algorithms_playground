@@ -184,7 +184,10 @@ class LinkedList(Generic[E]):
 
     def count(self) -> int:
         """ Returns the number of items in the linked list. O(n) time. """
-        raise NotImplementedError
+        count = 0
+        for _ in self:
+            count += 1
+        return count
 
     def pprint(self, file=None):
         """ Pretty print the values of the elements of the linked list,
@@ -348,6 +351,36 @@ def test_ll_traverse_stop_iteration_arb(v1, v2):
 
         # v1 items inserted into list
         assert result.count == len(v1)
+
+
+## Count tests
+
+
+def test_ll_count_empty():
+    ll = LinkedList()
+    assert ll.count() == 0
+
+
+def test_ll_count_1():
+    ll = LinkedList()
+    ll.append("hi")
+    assert ll.count() == 1
+
+
+def test_ll_count_2():
+    ll = LinkedList()
+    ll.append("hello")
+    ll.append("there")
+    assert ll.count() == 2
+
+
+@given(st.lists(st.integers()))
+def test_ll_count_arb(v):
+    ll = LinkedList()
+
+    for x in v:
+        ll.prepend(x)
+    assert ll.count() == len(v)
 
 
 ## Pretty print tests
