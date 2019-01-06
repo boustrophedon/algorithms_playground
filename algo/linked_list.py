@@ -1,7 +1,15 @@
 from typing import TypeVar, Optional, Generic, Callable
 
+# TODO: use hypothesis rule-based testing https://hypothesis.works/articles/rule-based-stateful-testing/
+
 E = TypeVar("E")
 Ctx = TypeVar("Ctx")
+
+# FIXME: should I just import and use queue.Empty?
+class Empty(Exception):
+    """ Exception raised during an operation when the linked list is empty """
+
+    pass
 
 
 class Node(Generic[E]):
@@ -44,17 +52,45 @@ class LinkedList(Generic[E]):
             self._head = new_node
             return
 
+        # attach the new head on top of the current one
         new_node.next = self._head
+        # set the head to the new node
         self._head = new_node
 
     def pop(self) -> E:
         """ Returns and removes the tail element of the linked list. Throws an
-        exception if the linked list is empty. O(n) time. """
-        raise NotImplementedError
+        `Empty` exception if the linked list is empty. O(n) time. """
+        if self._head is None:
+            raise Empty
+
+        # special case for popping the head
+        if self._head.next is None:
+            result = self._head.value
+            self._head = None
+            return result
+
+        # FIXME: traverse should probably have two type parameters, one for ctx
+        # and one for output so it's a fold_map/filter_map kind of thing
+        def second_to_last(_n: Node[E], curr: Node[E]) -> Node[E]:
+            # there's no way to do an unwrap and we know that curr.next.next will always be valid
+            if curr.next.next is None:  # type: ignore
+                raise StopIteration(curr)
+
+            # this line will never be reached
+            return _n
+
+        # self._head is unused
+        new_last = self.traverse_nodes(second_to_last, self._head)
+        # get the last item's value
+        result = new_last.next.value  # type: ignore
+        # remove last from the list
+        new_last.next = None
+
+        return result
 
     def popleft(self) -> E:
         """ Returns and removes the head element of the linked list. Throws an
-        exception if the linked list is empty. O(1) time. """
+        `Empty` exception if the linked list is empty. O(1) time. """
         raise NotImplementedError
 
     # FIXME: should I use a context parameter or just `...`, which is apparently legal
@@ -284,6 +320,81 @@ def test_ll_traverse_stop_iteration_arb(v1, v2):
 
         # v1 items inserted into list
         assert result.count == len(v1)
+
+
+## Pop tests
+def test_ll_pop_empty():
+    ll = LinkedList()
+    try:
+        ll.pop()
+    except Empty:
+        pass  # We should get empty
+    except Exception as err:
+        assert (
+            False
+        ), f"Non-empty exception raised when popping from empty list: {type(err)}"
+
+
+def test_ll_pop_1():
+    ll = LinkedList()
+    ll.append(1)
+    assert ll.pop() == 1
+
+
+def test_ll_pop_2():
+    ll = LinkedList()
+    ll.append(1)
+    ll.append(2)
+    assert ll.pop() == 2
+    assert ll.pop() == 1
+
+
+# TODO: use hypothesis rule-based model testing
+@given(st.lists(st.integers()))
+def test_ll_pop_in_order_arb(v):
+    ll = LinkedList()
+    for x in v:
+        ll.append(x)
+
+    for x in reversed(v):
+        assert ll.pop() == x
+
+    # make sure that we get empty exception once we've popped everything
+    try:
+        ll.pop()
+    except Empty:
+        pass  # We should get empty
+    except Exception as err:
+        assert (
+            False
+        ), f"Non-empty exception raised when popping from empty list: {type(err)}"
+
+
+@given(st.lists(st.integers()), st.lists(st.integers()))
+def test_ll_pop_interspersed_arb(v1, v2):
+    """ Insert all elements of v1, then alternate between popping and inserting
+    elements of v2 and v1. """
+    ll = LinkedList()
+    for x in v1:
+        ll.append(x)
+    for x in reversed(v1):
+        assert ll.pop() == x
+
+        # now add element of v2 and check popping gives the correct element
+        if len(v2) > 0:
+            x2 = v2.pop()
+            ll.append(x2)
+            assert ll.pop() == x2
+
+    # make sure that we get empty exception once we've popped everything
+    try:
+        ll.pop()
+    except Empty:
+        pass  # We should get empty
+    except Exception as err:
+        assert (
+            False
+        ), f"Non-empty exception raised when popping from empty list: {type(err)}"
 
 
 ## Prepend tests
