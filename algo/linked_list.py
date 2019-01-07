@@ -30,6 +30,13 @@ class LinkedList(Generic[E]):
         """ Returns the head node of the linked list. """
         return self._head
 
+    def empty(self) -> bool:
+        """ Returns True if the linked list has no elements, False otherwise. O(1) time. """
+        if self._head:
+            return False
+        else:
+            return True
+
     def append(self, e: E):
         """ Appends the element `e` to the end of the linked list. O(n) time.
         """
@@ -211,6 +218,15 @@ class LinkedList(Generic[E]):
             yield curr.value
             curr = curr.next
 
+    def __bool__(self):
+        """ Returns True if the list has at least one element, and False otherwise.
+        Used for `if ll: ...` constructions.
+        """
+        return not self.empty()
+
+    # for python 2 compatibility
+    # __nonzero__ == __bool__
+
 
 from hypothesis import given
 import hypothesis.strategies as st
@@ -353,9 +369,34 @@ def test_ll_traverse_stop_iteration_arb(v1, v2):
         assert result.count == len(v1)
 
 
+## __bool__ tests
+def test_ll_bool_empty():
+    ll = LinkedList()
+    if ll:
+        assert False, "Returned True in if statement even though the list was empty."
+    else:
+        assert True
+
+
+def test_ll_bool_nonempty():
+    ll = LinkedList()
+    ll.append("a")
+    if ll:
+        assert True
+    else:
+        assert (
+            False
+        ), "Returned False in if statement even though the list was not empty."
+
+    # now remove element and check it returns False again
+    ll.pop()
+    if ll:
+        assert False, "Returned True in if statement even though the list was empty."
+    else:
+        assert True
+
+
 ## Count tests
-
-
 def test_ll_count_empty():
     ll = LinkedList()
     assert ll.count() == 0
