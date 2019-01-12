@@ -1,12 +1,7 @@
 # Kozen Ch 8, p40
-from typing import List, TypeVar, Optional, Any
+from typing import TypeVar, Optional, Any
 
-# TODO: Use a linked list in order to do the "add with carry" operation.
-# It might simplify some of the logic (it might make it more complicated
-# though) and we wouldn't have to keep an index to the minimal tree, just a
-# pointer.
-# Additionally, it would use less memory: we wouldn't have to allocate when
-# doing the traversal as we do now in the get and set methods.
+from algo.linked_list import LinkedList, Node
 
 # TODO: when python 3.7 gets on travis, replace 'TypeName' with TypeName in
 # method signatures that use the current class's, or not-yet-defined class's, type.
@@ -18,35 +13,35 @@ from typing import List, TypeVar, Optional, Any
 E = TypeVar("E", bound=Any)
 
 
+class Empty(Exception):
+    pass
+
+
 class BinomialHeap:
     def __init__(self) -> None:
         """ Create an empty binomial heap. """
 
-        self._trees: List[Optional[_BinTree]] = list()
-        self._min_idx: Optional[int] = None
+        self._trees: LinkedList[_BinTree] = LinkedList()
+        self._min_tree_node: Optional[Node[_BinTree]] = None
 
     def _get_min_tree(self) -> Optional["_BinTree"]:
 
-        if self._min_idx is not None:
-            min_tree = self._trees[self._min_idx]
-            if min_tree:
-                return min_tree
-            else:
-                raise RuntimeError("Minimum tree index points to an empty position.")
+        if self._min_tree_node:
+            return self._min_tree_node.value
         else:
             return None
 
-    def _update_min_idx(self):
-        # fmt: off
-        self._min_idx = min(
-            # (index, minval of tree) for non-None trees
-            ((i, t.value) for i, t in enumerate(self._trees) if t is not None),
-            # select min by value
-            key=lambda x: x[1],
-            # if there are no trees in self._trees, just return None
-            default=(None, None),
-        )[0]  # then use the resulting index from the min tuple
-        # fmt: on
+    def _update_min_tree_node(self):
+        def min_node(min_node, curr_node):
+            if curr_node.value.value < min_node.value.value:
+                min_node = curr_node
+            return min_node
+
+        head = self._trees.head()
+        if head is None:
+            self._min_tree_node = None
+        else:
+            self._min_tree_node = self._trees.traverse_nodes(min_node, head)
 
     def find_min(self) -> Optional[E]:
         """ Find the minimum element of this heap. O(1) """
@@ -60,9 +55,10 @@ class BinomialHeap:
         """ Insert the element `element` into this heap. Amortized O(1), worst
         case O(log(n)) """
 
-        if len(self._trees) == 0:
+        if self._trees.empty():
             self._trees.append(_BinTree(element))
-            self._min_idx = 0
+            self._min_tree_node = self._trees.head()
+
         else:
             new_heap = BinomialHeap()
             new_heap.insert(element)
@@ -71,22 +67,19 @@ class BinomialHeap:
     def delete_min(self):
         """ Delete the minimum element from this heap. O(log(n)) """
 
-        min_tree = self._get_min_tree()
-        if min_tree is None:
-            # list.pop() raises IndexError, so we do the same
-            raise IndexError("Delete min from empty heap")
+        if self._min_tree_node is None:
+            raise Empty("Delete min from empty heap")
 
         # get the children of the current min
-        children = min_tree.pop_children()
+        children = self._min_tree_node.value.pop_children()
 
         # remove the current min from our trees
-        self._trees[self._min_idx] = None
-        self._update_min_idx()
+        self._trees.remove_node(self._min_tree_node)
+        self._update_min_tree_node()
 
         # make a new heap from the children of the old min tree
         new_heap = BinomialHeap()
         new_heap._trees = children
-        new_heap._update_min_idx()
 
         self.meld(new_heap)
 
@@ -95,95 +88,109 @@ class BinomialHeap:
 
         You should not `meld(x, x)`. Additionally, you should not use
         `other` after passing it into `meld`.
-
-        Meld works similar to doing addition by hand: you add up the trees of
-        the same rank and carry if there's an extra.
         """
 
-        us = self._trees
-        them = other._trees
+        # FIXME: this code could maybe be simpler if we had a linked list that
+        # kept track of the head and tail.  not necessarily a circular linked
+        # list because that makes other parts of this code more complicated as
+        # well.
 
-        carry = None
+        left = self._trees.head()
+        right = other._trees.head()
 
-        # Getter and setters to advance by 1 along the arrays of trees.
-        # They throw exceptions if the indices have fallen out of sync, at the
-        # expense of allocating more memory.
-        def get(l, i):
-            if i < len(l):
-                return l[i]
-            elif i == len(l):
-                l.append(None)
-                return None
-            else:
-                raise IndexError("Can only index by 1 past the end")
+        if left is None:
+            self._trees = other._trees
+            self._update_min_tree_node()
+            return
+        if right is None:
+            self._update_min_tree_node()
+            return
 
-        def set(l, i, x):
-            if i < len(l):
-                l[i] = x
-            elif i == len(l):
-                l.append(x)
-            else:
-                raise IndexError("Can only index by 1 past the end")
+        left_tree = left.value
+        right_tree = right.value
 
-        # Traverse the two heaps' trees simultaneously. We use the above get
-        # and set to append if we've reached the end of one of the lists.
-        # Unfortunately, this means that we use extra memory to hold Nones if
-        # one is significantly larger than the other.
+        merged: LinkedList[_BinTree] = LinkedList()
+        merged_tail = None
 
-        # The code here is very similar to adding two polynomials together, or
-        # as mentioned above, doing addition by hand with carrying.
+        # merge the first two nodes outside the loop so that we can set the tail
+        if left_tree.rank == right_tree.rank:
+            left_tree.link(right_tree)
 
-        n = max(len(us), len(them))
-        for i in range(0, n):
-            us_i = get(us, i)
-            them_i = get(them, i)
+            merged.append(left_tree)
+            merged_tail = merged.head()
+            left = left.next
+            right = right.next
 
-            # if both are not none, add them and carry over, melding the
-            # current carry into us if there is one.
-            if us_i and them_i:
-                us_i.link(them_i)
-                set(us, i, None)
-                set(them, i, None)
-                # if there is a carry from previous, put it in the current
-                if carry:
-                    set(us, i, carry)
-                # carry over binomial tree of rank i+1 to next iteration
-                carry = us_i
+        elif left_tree.rank < right_tree.rank:
+            merged.append(left_tree)
+            merged_tail = merged.head()
+            left = left.next
+        else:
+            merged.append(right_tree)
+            merged_tail = merged.head()
+            right = right.next
 
-            # if we have a tree and they don't, add carry if there is one,
-            # otherwise keep ours.
-            elif us_i and not them_i:
-                if carry:
-                    us_i.link(carry)
-                    carry = us_i
-                    set(us, i, None)
-                else:  # for consistency
-                    pass
+        while left is not None and right is not None:
+            # The type checker doesn't know that merged_tail cannot be none by
+            # consturction, so we have to assert.
+            assert merged_tail is not None
 
-            # if they have a tree and we don't, add carry if there is one,
-            # otherwise move theirs to ours.
-            elif not us_i and them_i:
-                if carry:
-                    them_i.link(carry)
-                    carry = them_i
-                    set(them, i, None)
+            left_tree = left.value
+            right_tree = right.value
+            merged_tree = merged_tail.value
+
+            # If both trees have the same rank, link them and add it to the end
+            # of the merged list, further linking it with tree at the tail of the
+            # merged list if they also have the same rank.
+            if left_tree.rank == right_tree.rank:
+                left_tree.link(right_tree)
+
+                if left_tree.rank == merged_tree.rank:
+                    merged_tree.link(left_tree)
                 else:
-                    set(us, i, them_i)
+                    merged_tail.next = Node(left_tree, None)
+                    merged_tail = merged_tail.next
 
-            # if neither have tree, move carry into current spot if there is one
+                left = left.next
+                right = right.next
+
+            # Otherwise, add the smaller-ranked tree to the merged list,
+            # linking it with the tree at the tail of the merged list if they
+            # have the same rank.
+            elif left_tree.rank < right_tree.rank:
+                merged_tail.next = Node(left_tree, None)
+                merged_tail = merged_tail.next
+                left = left.next
+
             else:
-                if carry:
-                    set(us, i, carry)
-                    carry = None
+                merged_tail.next = Node(right_tree, None)
+                merged_tail = merged_tail.next
+                right = right.next
 
-        # if there's a carry leftover at the end, push it
-        if carry:
-            us.append(carry)
+        # If there are leftovers, append them to the rest of the tree, linking
+        # if necessary.
+        leftover = None
+        if left is not None:
+            leftover = left
+        elif right is not None:
+            leftover = right
 
-        # update overall min_idx
-        # TODO: we could update the min inline with the other updates, but the
-        # code is messy enough already
-        self._update_min_idx()
+        while leftover is not None:
+            # The type checker doesn't know that merged_tail cannot be None by
+            # consturction, so we have to assert.
+            assert merged_tail is not None
+
+            tree = leftover.value
+            merged_tree = merged_tail.value
+            if tree.rank == merged_tree.rank:
+                merged_tree.link(tree)
+            else:
+                merged_tail.next = Node(tree, None)
+                merged_tail = merged_tail.next
+            leftover = leftover.next
+
+        self._trees = merged
+        self._update_min_tree_node()
 
 
 class _BinTree:
@@ -193,18 +200,18 @@ class _BinTree:
         makes a `B_{k+1}`.  Binomial trees of differing ranks cannot be combined.
         """
 
-        self._value = element
-
-        self._children: List[_BinTree] = list()
+        self._value: E = element
+        self._children: LinkedList[_BinTree] = LinkedList()
+        self._rank: int = 0
 
     @property
     def rank(self) -> int:
         """ Returns the rank of the binomial tree. """
-        return len(self._children)
+        return self._rank
 
-    def pop_children(self) -> List["_BinTree"]:
+    def pop_children(self) -> LinkedList["_BinTree"]:
         """ Returns the children of the root of this tree, which should be a
-        list of `_BinTree`s of increasing rank.
+        linked list of `_BinTree`s of increasing rank.
 
         You should not use this object after calling this method.
         """
@@ -220,6 +227,8 @@ class _BinTree:
 
         You should not `link(x, x)`. Additionally, you should not use `other`
         after using it as an argument to link.
+
+        This operation is O(k).
         """
 
         if self.rank != other.rank:
@@ -234,12 +243,16 @@ class _BinTree:
             self._value, other._value = other._value, self._value
 
         self._children.append(other)
+        self._rank += 1
 
     @property
     def value(self) -> E:
         """ Get the value at the root of the tree """
 
         return self._value
+
+    def __str__(self):
+        return f"rank {self.rank}, val {self.value}"
 
 
 ### Tests
@@ -416,12 +429,58 @@ def test_binheap_delete_min_1():
     assert h.find_min() is None
 
 
+def test_binheap_delete_min_long_fail():
+    """ Do a heapsort using the binomial heap, make sure it gives the same
+    answer as regular sort. """
+    v = [0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, -1, 1]
+    sv = sorted(v)
+
+    h = BinomialHeap()
+    for x in v:
+        h.insert(x)
+
+    for x in sv:
+        assert x == h.find_min()
+        h.delete_min()
+
+
+def test_binheap_delete_min_long_fail_2():
+    """ Do a heapsort using the binomial heap, make sure it gives the same
+    answer as regular sort. """
+    v = [0, 0, 0, 0, 0, 0, 0, -2, 0, -1, 0, -2, 1]
+    sv = sorted(v)
+
+    h = BinomialHeap()
+    for x in v:
+        h.insert(x)
+
+    for x in sv:
+        assert x == h.find_min()
+        h.delete_min()
+
+
+def test_binheap_delete_min_very_long():
+    """ Do a heapsort using the binomial heap, make sure it gives the same
+    answer as regular sort. """
+    for i in range(1, 200):
+        v = [0] * i + [-1, 1]
+        sv = sorted(v)
+
+        h = BinomialHeap()
+        for x in v:
+            h.insert(x)
+
+        for x in sv:
+            assert x == h.find_min()
+            h.delete_min()
+
+
 def test_binheap_delete_min_empty_err():
     h = BinomialHeap()
 
     try:
         h.delete_min()
-    except IndexError as err:
+    except Empty as err:
         assert "Delete min from empty heap" in str(err)
 
     h.insert(7)
@@ -432,7 +491,7 @@ def test_binheap_delete_min_empty_err():
 
     try:
         h.delete_min()
-    except IndexError as err:
+    except Empty as err:
         assert "Delete min from empty heap" in str(err)
 
 
@@ -579,7 +638,7 @@ def test_bintree_link_diff_rank():
 def test_bintree_children_1():
     t1 = _BinTree(0)
     children = t1.pop_children()
-    assert len(children) == 0
+    assert children.count() == 0
 
 
 def test_bintree_children_2():
@@ -588,8 +647,10 @@ def test_bintree_children_2():
     t1.link(t2)
 
     children = t1.pop_children()
-    assert len(children) == 1
-    assert children[0].value == 1
+    assert children.count() == 1
+    # head gives us the LL Node, .value gives us the BinTree, and .value.value
+    # gives us the value of the BinTree
+    assert children.head().value.value == 1
 
     # and the other way
     t1 = _BinTree(1)
@@ -597,8 +658,10 @@ def test_bintree_children_2():
     t1.link(t2)
 
     children = t1.pop_children()
-    assert len(children) == 1
-    assert children[0].value == 1
+    assert children.count() == 1
+    # head gives us the LL Node, .value gives us the BinTree, and .value.value
+    # gives us the value of the BinTree
+    assert children.head().value.value == 1
 
 
 @given(st.lists(st.integers(), min_size=8, max_size=8))
@@ -626,6 +689,6 @@ def test_bintree_children_arb_4(v):
     # the rank of each subtree of the root of a binomial tree increases by 1 at
     # each successive index.
     children = t1.pop_children()
-    assert len(children) == 3
-    for i in range(0, 3):
-        assert children[i].rank == i
+    assert children.count() == 3
+    for i, child in enumerate(children):
+        assert child.rank == i
