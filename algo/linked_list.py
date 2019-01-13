@@ -112,6 +112,31 @@ class LinkedList(Generic[E]):
 
         return result
 
+    def remove_node(self, node: Node[E]):
+        """ Remove the Node `node` from the list, connecting its previous node to its next.
+
+        Raises a ValueError if `node` is not in the list. Raise Empty if list is empty.
+
+        This is an O(n) operation because this list is singly-linked.
+        """
+
+        if self._head is None:
+            raise Empty()
+
+        # special case for removing the head node
+        if self._head is node:
+            self._head = self._head.next
+            return
+
+        curr = self._head
+        while curr is not None:
+            if curr.next is node:
+                curr.next = curr.next.next  # type: ignore
+                return
+            curr = curr.next  # type: ignore
+
+        raise ValueError(f"Node {node} not found in linked list")
+
     # FIXME: should I use a context parameter or just `...`, which is apparently legal
     # See https://docs.python.org/3/library/typing.html#callable
     def traverse(self, f: Callable[[Ctx, E], Ctx], initial_context: Ctx) -> Ctx:
@@ -367,6 +392,126 @@ def test_ll_traverse_stop_iteration_arb(v1, v2):
 
         # v1 items inserted into list
         assert result.count == len(v1)
+
+
+## remove tests
+
+import random
+
+
+def test_ll_remove_empty():
+    ll = LinkedList()
+    n = Node(1, None)
+    try:
+        ll.remove_node(n)
+    except Empty:
+        pass
+    except Exception as err:
+        assert False, f"Other exception thrown inside iterator: {type(err)}"
+    else:
+        assert False, "remove call should have thrown an exception but it did not"
+
+
+@given(st.lists(st.integers(), min_size=1))
+def test_ll_remove_not_found_arb(v):
+    ll = LinkedList()
+    for x in v:
+        ll.prepend(x)
+
+    # contents doesn't matter because remove removes the *node*, not the item,
+    # and nodes with equal values are not the same node.
+    n = Node(1, None)
+    try:
+        ll.remove_node(n)
+    except ValueError:
+        pass
+    except Exception as err:
+        assert False, f"Other exception thrown inside iterator: {type(err)}"
+    else:
+        assert False, "remove call should have thrown an exception but it did not"
+
+
+def test_ll_remove_head_only():
+    ll = LinkedList()
+    ll.append(1)
+    head = ll.head()
+    ll.remove_node(head)
+
+    assert ll.count() == 0
+    assert ll.head() is None
+
+
+def test_ll_remove_head_1():
+    ll = LinkedList()
+    ll.append(1)
+    ll.append(2)
+    head = ll.head()
+    ll.remove_node(head)
+
+    assert ll.count() == 1
+    assert ll.head().value == 2
+
+
+def test_ll_remove_tail_1():
+    ll = LinkedList()
+    ll.append(1)
+    ll.prepend(2)
+    head = ll.head()
+    ll.remove_node(head)
+
+    assert ll.count() == 1
+    assert ll.head().value == 1
+
+
+def test_ll_remove_middle():
+    ll = LinkedList()
+    ll.append(1)
+    ll.append(2)
+    ll.append(3)
+    middle = ll.head().next
+    ll.remove_node(middle)
+
+    assert ll.count() == 2
+    assert ll.head().value == 1
+    assert ll.head().next.value == 3
+
+
+@given(st.lists(st.integers()))
+def test_ll_remove_in_order_arb(v):
+    ll = LinkedList()
+
+    for x in v:
+        # prepending is faster
+        ll.prepend(x)
+
+    # since we prepended, ll items are in reverse order
+    for x in reversed(v):
+        assert ll.head().value == x
+        ll.remove_node(ll.head())
+
+    assert ll.count() == 0
+    assert ll.head() is None
+
+
+@given(st.lists(st.integers()))
+def test_ll_remove_random_order_arb(v):
+    ll = LinkedList()
+
+    for x in v:
+        ll.prepend(x)
+
+    def collect_nodes(nodes_set, curr):
+        nodes_set.add(curr)
+        return nodes_set
+
+    nodes_set = ll.traverse_nodes(collect_nodes, set())
+    shuffled_nodes = list(nodes_set)
+    random.shuffle(shuffled_nodes)
+
+    for node in shuffled_nodes:
+        nodes_set.remove(node)
+        ll.remove_node(node)
+        assert nodes_set == ll.traverse_nodes(collect_nodes, set())
 
 
 ## __bool__ tests
