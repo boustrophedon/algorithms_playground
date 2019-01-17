@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/boustrophedon/algorithms_playground.svg?branch=master)](https://travis-ci.org/boustrophedon/algorithms_playground)
 
-Just practice implementing some algorithms for interview prep, mostly from Kozen's Design and Analysis of Algorithms.
+Just practice implementing some algorithms for interview prep, mostly from Kozen's Design and Analysis of Algorithms. I started using the new typing system halfway through and would like to get the code passing `mypy --strict` at some point.
 
 # Algorithms
 
@@ -28,7 +28,7 @@ Just practice implementing some algorithms for interview prep, mostly from Kozen
 - [ ] Maybe faster hash functions (many blog posts about this)
 
 ## Collections
-- [~] Linked list just for fun
+- [x] Linked list just for fun
 - [x] Binomial heaps
 - [ ] Fibonacci heaps
 - [ ] Pairing heap
@@ -41,9 +41,13 @@ Just practice implementing some algorithms for interview prep, mostly from Kozen
 - [x] Mergesort (non-recursive) [\*]
 - [ ] Burrows-Wheeler transformation
 
+# CI
+
+Travis builds are gated on `black`, `flake8`, and `mypy`.
+
 # Running the code
 
-To run the tests for a given python file, have pipenv installed, install dependencies with `pipenv install --dev --pre` and run `pipenv run pytest <python_file>`.
+To run the tests for a given python file, have pipenv installed, install dependencies with `pipenv install --dev` and run `pipenv run pytest <python_file>`.
 
 To run all tests you just run `pytest`.
 
