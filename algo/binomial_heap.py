@@ -260,8 +260,45 @@ import random
 
 from hypothesis import given
 import hypothesis.strategies as st
+from hypothesis.stateful import RuleBasedStateMachine, rule, precondition, invariant
 
 ## Binomial heap tests
+
+# Rule-based stateful testing https://hypothesis.works/articles/rule-based-stateful-testing/
+# https://hypothesis.readthedocs.io/en/latest/stateful.html
+
+
+class BinomialHeapMachine(RuleBasedStateMachine):
+    def __init__(self):
+        super().__init__()
+
+        self.model = list()
+        self.binheap = BinomialHeap()
+
+    @rule(x=st.integers())
+    def insert(self, x):
+        self.model.append(x)
+        self.binheap.insert(x)
+
+    @rule()
+    # precondition: the heap should not be empty => the model should not be empty
+    @precondition(lambda self: self.model)
+    def delete_min(self):
+        model_min = min(self.model)
+        self.model.remove(model_min)
+        self.binheap.delete_min()
+
+    @invariant()
+    # precondition: the heap should not be empty => the model should not be empty
+    @precondition(lambda self: self.model)
+    def min_is_correct(self):
+        model_min = min(self.model)
+        heap_min = self.binheap.find_min()
+
+        assert model_min == heap_min
+
+
+TestHeapModel = BinomialHeapMachine.TestCase
 
 # Create and add/find_min tests
 
