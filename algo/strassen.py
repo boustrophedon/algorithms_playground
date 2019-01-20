@@ -3,10 +3,12 @@
 
 # Note that the formulae in the book are subtly incorrect: S_5 and S_7 should be reversed
 
+from typing import List
 import numpy as np
 
 
-def get_blocks(m):
+def get_blocks(m: np.ndarray) -> List[np.ndarray]:
+    """ Split a 2^n x 2^n matrix into 4 blocks of size 2^(n-1) by 2^(n-1)"""
     n = m.shape[0]
     n2 = n // 2
 
@@ -19,7 +21,7 @@ def get_blocks(m):
     return blocks
 
 
-def strassen(m1, m2):
+def strassen(m1: np.ndarray, m2: np.ndarray) -> np.array:
     """ Multiply matrices m1 and m2 using the Strassen algorithm. m1 and m2
     must be square, power-of-2-sized matrices. """
 
