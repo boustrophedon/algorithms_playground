@@ -1,11 +1,9 @@
 from typing import List, TypeVar, Optional, Generic, Callable
 
-# TODO: use hypothesis rule-based testing https://hypothesis.works/articles/rule-based-stateful-testing/
-
 E = TypeVar("E")
 Ctx = TypeVar("Ctx")
 
-# FIXME: should I just import and use queue.Empty?
+
 class Empty(Exception):
     """ Exception raised during an operation when the linked list is empty """
 
@@ -253,11 +251,56 @@ class LinkedList(Generic[E]):
     # __nonzero__ == __bool__
 
 
+from collections import deque
+
 from hypothesis import given
 import hypothesis.strategies as st
+from hypothesis.stateful import RuleBasedStateMachine, rule, precondition, invariant
 
 ### Linked List tests
 
+## Model-based testing
+
+
+class LinkedListModel(RuleBasedStateMachine):
+    def __init__(self):
+        super().__init__()
+
+        self.model = deque()
+        self.ll = LinkedList()
+
+    @invariant()
+    def same_items_in_same_order(self):
+        assert len(self.model) == self.ll.count()
+        for (m_item, l_item) in zip(self.model, self.ll):
+            assert m_item == l_item
+
+    @rule(x=st.integers())
+    def prepend(self, x):
+        self.model.appendleft(x)
+        self.ll.prepend(x)
+
+    @rule(x=st.integers())
+    def append(self, x):
+        self.model.append(x)
+        self.ll.append(x)
+
+    @rule()
+    # model/list should not be empty when popping
+    @precondition(lambda self: self.model)
+    def popleft(self):
+        self.model.popleft()
+        self.ll.popleft()
+
+    @rule()
+    # model/list should not be empty when popping
+    @precondition(lambda self: self.model)
+    def pop(self):
+        self.model.pop()
+        self.ll.pop()
+
+
+TestLLModel = LinkedListModel.TestCase
 
 ## Traverse tests
 
