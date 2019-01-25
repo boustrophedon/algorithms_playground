@@ -6,8 +6,8 @@ install:
         - pipenv install --dev --skip-lock
 cache: pip
 script:
-        - pipenv run mypy algo/
+        - pipenv run mypy algo/ tests/ bench/
         - pipenv run pytest
-        - pipenv run black --check algo/
-        - pipenv run flake8 algo/
+        - pipenv run black --check algo/ tests/ bench/
+        - pipenv run flake8 algo/ test/ bench/
 python: 3.6
