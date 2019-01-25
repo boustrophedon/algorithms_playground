@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/boustrophedon/algorithms_playground.svg?branch=master)](https://travis-ci.org/boustrophedon/algorithms_playground)
+[![Build Status](https://travis-ci.org/boustrophedon/algorithms_playground.svg?branch=master)](https://travis-ci.org/boustrophedon/algorithms_playground) [![Coverage Status](https://coveralls.io/repos/github/boustrophedon/algorithms_playground/badge.svg?branch=master)](https://coveralls.io/github/boustrophedon/algorithms_playground?branch=master)
 
 Just practice implementing some algorithms for interview prep, mostly from Kozen's Design and Analysis of Algorithms. I started using the new typing system halfway through and would like to get the code passing `mypy --strict` at some point.
 
