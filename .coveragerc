@@ -1,0 +1,6 @@
+[run]
+source = algo/
+branch = true
+
+[report]
+show_missing = true

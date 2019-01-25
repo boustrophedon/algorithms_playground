@@ -3,3 +3,5 @@ __pycache__/
 Pipfile.lock
 .hypothesis/
 .mypy_cache/
+.coverage
+.coverage\.*

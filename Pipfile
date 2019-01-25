@@ -17,6 +17,7 @@ pytest-pudb = "*"
 mypy = "==0.650"
 flake8 = "*"
 black = "*"
+pytest-cov = "*"
 
 [requires]
 python_version = "3.7"
