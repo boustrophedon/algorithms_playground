@@ -50,6 +50,18 @@ def test_two_vertices():
     assert_is_tree(g.mst_slow())
 
 
+def test_triangle():
+    g = Graph()
+    g.add_edge(0, 1, 1)
+    g.add_edge(0, 2, 1)
+    g.add_edge(1, 2, 2)
+
+    mst = g.mst_slow()
+
+    assert len(mst.adj_list) == len(g.adj_list)
+    assert_is_tree(g.mst_slow())
+
+
 def test_random_graphs_mst_slow():
     for _ in range(0, 100):
         n = 50

@@ -66,7 +66,13 @@ class Graph:
 
             # both vertices are in the same component: skip it
             if components.get(v1) == components.get(v2) is not None:
-                continue
+                continue  # pragma: no cover
+                # NB: Python optimizes out the continue here, so we get a
+                # missed line in our coverage, but the code is correct and this
+                # line is hit: you can see this if you trace through
+                # tests/mst_slow.py:test_triangle
+                # See https://bitbucket.org/ned/coveragepy/issues/198/continue-marked-as-not-covered
+
             # neither vertex is part of a component: make new component
             elif v1 not in components and v2 not in components:
                 components[v1] = new_component
