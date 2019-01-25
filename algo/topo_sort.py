@@ -51,7 +51,7 @@ class Graph:
         queue = list()
         order = list()
 
-        inc_remaining = defaultdict(lambda: 0)
+        inc_remaining = dict()
 
         for v, (out, inc) in self.adj_list.items():
             if len(inc) == 0:
