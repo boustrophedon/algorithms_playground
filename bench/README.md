@@ -1,0 +1,1 @@
+this is/was an experiment in verifying the performance characteristics of algorithms, but I either need to learn more stats or it's just too hard to tell the difference between a linear algorithm and one that's nlogn without taking way too long.

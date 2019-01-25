@@ -4,7 +4,7 @@ import csv
 import timeit
 
 from algo.mergesort import mergesort
-from algo.bench.models import Onlogn
+from .models import Onlogn
 
 
 def run_merge_benches_reversed(start_size, end_size, step_size, trials_per_array):
