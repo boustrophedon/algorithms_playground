@@ -41,6 +41,18 @@ class BinomialHeapMachine(RuleBasedStateMachine):
 
         assert model_min == heap_min
 
+    @invariant()
+    def trees_in_order(self):
+        """ The internal linked list of binomial trees should be strictly
+        ordered by rank. """
+
+        prev = None
+        for curr in self.binheap._trees:
+            if prev is None:
+                prev = curr
+            else:
+                assert prev.rank < curr.rank
+
 
 TestHeapModel = BinomialHeapMachine.TestCase
 

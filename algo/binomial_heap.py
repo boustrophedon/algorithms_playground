@@ -130,14 +130,34 @@ class BinomialHeap:
             merged_tail = merged.head()
             right = right.next
 
+        def merge_or_append(
+            merged_tail: Node[_BinTree], tree: _BinTree
+        ) -> Node[_BinTree]:
+            """ Append the _BinTree `tree` to `merged_tail`, linking the trees
+            if they are the same rank, and returning the new tail of the merged list. """
+            merged_tree = merged_tail.value
+
+            if merged_tree.rank == tree.rank:
+                merged_tree.link(tree)
+                return merged_tail
+            else:
+                merged_tail.next = Node(tree, None)
+                merged_tail = merged_tail.next
+                return merged_tail
+
         while left is not None and right is not None:
             # The type checker doesn't know that merged_tail cannot be none by
-            # consturction, so we have to assert.
+            # construction, so we have to assert.
             assert merged_tail is not None
 
             left_tree = left.value
             right_tree = right.value
             merged_tree = merged_tail.value
+
+            # loop invariant: merged_tree's rank is always less than or equal
+            # to the rank of the smaller of left_tree and right_tree
+            assert merged_tree.rank <= left_tree.rank
+            assert merged_tree.rank <= right_tree.rank
 
             # If both trees have the same rank, link them and add it to the end
             # of the merged list, further linking it with tree at the tail of the
@@ -145,11 +165,12 @@ class BinomialHeap:
             if left_tree.rank == right_tree.rank:
                 left_tree.link(right_tree)
 
-                if left_tree.rank == merged_tree.rank:
-                    merged_tree.link(left_tree)
-                else:
-                    merged_tail.next = Node(left_tree, None)
-                    merged_tail = merged_tail.next
+                # By the loop invariant, left tree's rank must be greater than
+                # merged_tree's rank, since it was at least equal to it and
+                # after linking with right tree it grew by one.
+                # Therefore, we always append here.
+                assert left_tree.rank > merged_tree.rank
+                merged_tail = merge_or_append(merged_tail, left_tree)
 
                 left = left.next
                 right = right.next
@@ -158,13 +179,11 @@ class BinomialHeap:
             # linking it with the tree at the tail of the merged list if they
             # have the same rank.
             elif left_tree.rank < right_tree.rank:
-                merged_tail.next = Node(left_tree, None)
-                merged_tail = merged_tail.next
+                merged_tail = merge_or_append(merged_tail, left_tree)
                 left = left.next
 
             else:
-                merged_tail.next = Node(right_tree, None)
-                merged_tail = merged_tail.next
+                merged_tail = merge_or_append(merged_tail, right_tree)
                 right = right.next
 
         # If there are leftovers, append them to the rest of the tree, linking
@@ -177,16 +196,12 @@ class BinomialHeap:
 
         while leftover is not None:
             # The type checker doesn't know that merged_tail cannot be None by
-            # consturction, so we have to assert.
+            # construction, so we have to assert.
             assert merged_tail is not None
 
             tree = leftover.value
-            merged_tree = merged_tail.value
-            if tree.rank == merged_tree.rank:
-                merged_tree.link(tree)
-            else:
-                merged_tail.next = Node(tree, None)
-                merged_tail = merged_tail.next
+
+            merged_tail = merge_or_append(merged_tail, tree)
             leftover = leftover.next
 
         self._trees = merged
